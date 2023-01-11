@@ -1,5 +1,7 @@
 import { useState, useReducer } from "react";
 
+import './task_list_style.less'
+
 
 const TaskListComp = () => {
 

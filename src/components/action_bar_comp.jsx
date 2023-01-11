@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 import { tSklad } from '../data/task_data'
 
-import TaskListComp from './task_list_comp'
+import TaskListComp from './task_list.comp/task_list_comp'
 
 
 

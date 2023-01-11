@@ -1,9 +1,10 @@
 
 import './_App.css';
+import './App_style.less';
 import { useState } from 'react'
 
-import TaskList from './components/task_list_comp'
-import TaskListComp from './components/task_list_comp';
+import TaskList from './components/task_list.comp/task_list_comp'
+import TaskListComp from './components/task_list.comp/task_list_comp';
 
 /* 
 import DateComp from './components/date_comp'
