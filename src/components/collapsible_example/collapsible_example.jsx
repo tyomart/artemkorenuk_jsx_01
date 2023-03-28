@@ -23,7 +23,7 @@ return (
     </div>
     );
 }
-function App() {
+function Collapsible() {
     return (
         <div className="preferences">
              <Section title="General" defaultExpanded="true">
@@ -54,4 +54,4 @@ function App() {
        </div>
     );
 }
-export default App;
+export default Collapsible;

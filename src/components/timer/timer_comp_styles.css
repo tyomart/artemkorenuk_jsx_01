@@ -1,0 +1,10 @@
+
+.timer {
+
+    display: flex;
+    background-color:white;
+} 
+
+.text {
+    font-size: small;
+}

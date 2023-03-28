@@ -1,71 +1,40 @@
 
 import './_App.css';
 import './App_style.less';
-import { useState } from 'react'
 
-import TaskList from './components/task_list.comp/task_list_comp'
-import TaskListComp from './components/task_list.comp/task_list_comp';
 
-/* 
-import DateComp from './components/date_comp'
-import ActionBar from './components/action_bar_comp'
-import AuthBar from './components/auth_comp' */
+import Sandbox4 from './components/sandbox4.comp';
 
-/* import Task from './components/task-item/task-item'; */ //COMPs
-/* import { tSklad } from './data/task_data.js' */ // JSON
+import Timer from './components/timer/timer_comp';
+import TaskListComp from './components/task_list_comp/taskListcomp';
+import Calculator from './components/calculator/calculator';
+import Quotamat from './components/quotamat/quotamat';
+import Markdown from './components/markdown/markdown';
 
- 
-//import { pp } from './_test-pak-me/test-pack-me'; // TEST PAK
-/* import Form from './components/test.comp';  *///test comp
-// import Sandbox3 from './components/task_list_comp';
-//import Sandbox4 from './components/sandbox4.comp';
 
+// import DateComp from './components/date_comp';
 
 
 const App = () => {
-/* 
- const [stateTask, setStateTask ] = useState ({});   //STATE hook
-
-
- const handleTaskName = (e) => // set state
-  {e.preventDefault();
-    setStateTask({...stateTask, taskName: e.target.value});
-  
-  
-  };
-
-   const testBut = (e) => (console.log('test PRESSED', e)) */
-
-
 
   return ( 
- <div className="App">
+ <div >
 
- 
-  
- {/* <Sandbox3 /> props = {tSklad} */}
- <br />
+ {/* <br /> */}
 
-{/* //NEW TASK */}
- 
-{/* AUTH - NAV BAR */}
-{/* <AuthBar />
-      <h1> TODO list</h1> 
+{/* <TaskListComp /> */}
 
-<DateComp /> */}
 
-{/* CURRENT TASK */}
-{/*     { <Task taskItem = {tSklad[0]}>
-      <h2>
-      Current task</h2>
-      </Task> } 
-   
-<ActionBar  /> */}
 
-<TaskListComp />
+{/* <DateComp /> */}
 
-{/* <button >wtf button</button> */}
-  
+{/* <Sandbox4 /> */}
+{/* <Calculator /> */}
+
+<div className='blank-space1'> <br/></div>
+<Markdown />
+
+{/* <Quotamat /> */}
 </div>
   );
 }
