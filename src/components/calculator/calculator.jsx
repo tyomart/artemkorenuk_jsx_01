@@ -195,7 +195,7 @@ return (
 
 <InpContext.Provider value={inp}>
 <div className ='block'>
-<h4 className='app-title'>Calculator</h4>
+<h4 className='app-title'>Calculator (mvp ver.1.0)</h4>
 
     <Display dInp={inp} switchD ={switchD} eqPressed = {eqPressed}/>  
     {/* dMem={mem} */}
