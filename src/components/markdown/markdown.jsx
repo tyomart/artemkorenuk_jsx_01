@@ -13,11 +13,12 @@ const [edit, setEdit] = useState('') // //Shows Input
 
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
 const [cache, setCache] = useState([])
-
+const [bsf,setBSF] = useState(false)
 
 
 const flagsObj  = 
     {   outputFlag: false,
+        
         h1: false,
         h2: false,
         h3: false,
@@ -29,6 +30,7 @@ const flagsObj  =
   
     } 
 const [flags, setFlags] = useState( flagsObj )
+//  log('000 flags', flags)
 
 // ---------------------- engine block----
 
@@ -90,9 +92,17 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
 
     log('lastChar in proc:', lastChar(inVal))
 
-    if (special(lastChar(inVal))) { // if special, add Last to  Cache and Out
+    if (bsf === true) {
 
-        log('S')
+        setBSF(false)
+
+       // out = processorBS(inVal)
+        return [inVal, out.slice(0,-1)] //out
+    }
+
+    else if (special(lastChar(inVal))) { // if special, add Last to  Cache and Out
+
+        //log('S')
         setCache(cache.concat(lastChar(inVal)))
 
         out += lastChar(inVal)  //(readyTXT === undefined|| readyTXT.length === 0)  ? lastChar(inVal) : 
@@ -104,7 +114,7 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
     else if 
       
         (special(prevChar(inVal)) === false) { // if common, and previous is common -> out /// special(lastChar(inVal)) === false && 
-            log('0-0')
+           //log('0-0')
            
         out += lastChar(inVal) //(readyTXT === undefined|| readyTXT.length === 0)  ? lastChar(inVal) : 
         
@@ -114,7 +124,7 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
             return  [inVal, out]
         }
         else { // (special(prevChar(inVal)) === true)
-            log('1-0')
+            //log('1-0')
            
                 let tagLen = cache.length;
                 let outVal = '';
@@ -136,69 +146,89 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
     
     }
 
-const processorTXT0 = (inVal, out) => { /// sequentually change proc0 to proc foo and fix the error
-        if (special(lastChar(inVal))) { //if (lastChar(inVal) === '#') {
+const processorBS = (inBS,flag) => { /// MAKE THIS
+    let tagBS
+    let tagBSLength
 
-        // out += lastChar(inVal)
-        // log('s')
-        // log('out', out)
-        
-        log('S')
-        setCache(cache.concat(lastChar(inVal)))
+    const newSpecial = (oldVal, specChar) => {
 
-        out += lastChar(inVal) //(readyTXT === undefined|| readyTXT.length === 0)  ? lastChar(inVal) : 
-        log('readyTXT', readyTXT, 'caache', cache)
-       
-        // let outVal = readyTXT
-            return [inVal, out]
+        const findSpecial = () => {
+             
+            return 
+        }
+
+        return
     }
 
-    
-    else if (prevChar(inVal) !== '#' ) {
+    if (special(lastChar(inBS))===true) {
 
-        out += lastChar(inVal)
-    log('0-0')
-    log('out', out)
-    return [inVal,out]
-    }
-    else {
+        if (special(prevChar(inBS)) === true && 
+                (lastChar(inBS) !== prevChar(inBS)))
+                {
+        return processorBS(inBS, lastChar(inBS)) // no affecting on flags
+        }
 
-        //out += lastChar(inVal)
-       log('1-0')
-        log('out', out)
-        
-        const changedOut = out.length ?  out.slice(0,-1).concat('<#>').concat(lastChar(inVal)) : lastChar(inVal)
-        //log('lastChar', out.slice(-2,-1) )
-        return [inVal,changedOut] //
+        else if (special(prevChar(inBS)) === true && 
+                    (lastChar(inBS) === prevChar(inBS)))
+            {
+                
+                return processorBS(inBS, newSpecial(inBS))
+            }
+
+        else return inBS.slice(0,-1) // no TAG founded
+
+        // 
+        // reFlagged(in)
     }
-} 
+    else
+
+    return log('processor BS')
+}
 
 const handleIn = (e) => {
 
+    //log('001 flags', flags)
+   
     const inputString = e.target.value
-
     setPreIn(inputString)
 
     return 
   
 }
 
-useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> at Display /// I use it to sync editor and ReadyTXT
-     log('preIn in Effect',preIn)
-    const processedTXT = processorTXT(preIn, readyTXT) //readyTXT.length > 0 ? processorTXT0(preIn, readyTXT) : processorTXT0(preIn,preIn) 
-    //if readyTXT not filled yet then use preIn to process
-
-
- 
-   if (preIn.length >0) {  // to not send empties in state
+const handleBS =(e) => {
     
-    log('setEdit',processedTXT[0])
-    setEdit(preIn)
+if (e.key === 'Backspace' && preIn.length >0) {
 
-    log('setReady',processedTXT[1])
-    setReadyTXT(processedTXT[1])
-   }
-   else {log('empties')}
+    log('BACKSPACE')
+    setBSF(true)
+    //  setEdit(edit.slice(0,-1))
+    //  setReadyTXT(readyTXT.slice(0,-1))
+    
+    
+} return 
+
+    
+}
+
+useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> at Display /// I use it to sync editor and ReadyTXT
+     //log('preIn in Effect',preIn)
+
+
+    const processedTXT = processorTXT(preIn, readyTXT) 
+    
+    //const processedBS = 
+    
+
+   if (preIn.length >0) { // to not send empties in state
+
+
+        setEdit(preIn)
+
+        setReadyTXT(processedTXT[1])
+
+}
+  else {log('empties')}
 },[preIn])
 
 useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> at Display
@@ -239,13 +269,11 @@ const Preview = (props) => {  //const { eDisp }  = props
 //BIG RETURN before OUTPUT ---------------------------------
     return <> 
 
-
-
     <div>Markdown (under construct.)</div>
         <div id='editor'>editor
         <div id='input-wrapper'>
         <label>
-            <textarea id='editor-area' onChange={handleIn}></textarea>
+            <textarea id='editor-area' onKeyDown ={handleBS} onChange={handleIn}></textarea>
         </label>
         
         </div>
@@ -268,6 +296,43 @@ const Preview = (props) => {  //const { eDisp }  = props
 }
 
 export default Markdown;
+
+// const processorTXT0 = (inVal, out) => { /// sequentually change proc0 to proc foo and fix the error
+//         if (special(lastChar(inVal))) { //if (lastChar(inVal) === '#') {
+
+//         // out += lastChar(inVal)
+//         // log('s')
+//         // log('out', out)
+        
+//         log('S')
+//         setCache(cache.concat(lastChar(inVal)))
+
+//         out += lastChar(inVal) //(readyTXT === undefined|| readyTXT.length === 0)  ? lastChar(inVal) : 
+//         log('readyTXT', readyTXT, 'caache', cache)
+       
+//         // let outVal = readyTXT
+//             return [inVal, out]
+//     }
+
+    
+//     else if (prevChar(inVal) !== '#' ) {
+
+//         out += lastChar(inVal)
+//     log('0-0')
+//     log('out', out)
+//     return [inVal,out]
+//     }
+//     else {
+
+//         //out += lastChar(inVal)
+//        log('1-0')
+//         log('out', out)
+        
+//         const changedOut = out.length ?  out.slice(0,-1).concat('<#>').concat(lastChar(inVal)) : lastChar(inVal)
+//         //log('lastChar', out.slice(-2,-1) )
+//         return [inVal,changedOut] //
+//     }
+// } 
 
 
 // else {
