@@ -9,11 +9,12 @@ const Markdown = () => {
 const [preIn, setPreIn] = useState('') // inputing state
 //const [preInLen, setPreInLen] = useState(0) // inputing state
 const [edit, setEdit] = useState('') // //Shows Input
+const [readyTXT, setReadyTXT] = useState('') //Shows Output
  
 const [charBS, setCharBS] = useState('') // deleted char, BS flag 
 const [charBSflag, setCharBSflag] = useState(false) // deleted char, BS flag 
 
-const [readyTXT, setReadyTXT] = useState('') //Shows Output
+
 const [cache, setCache] = useState([])
 //const [bsf,setBSF] = useState(false)
 
@@ -89,10 +90,18 @@ const convert = (proTag) => {
             }
   
     else return proTag
-} 
+}
+
+const getTag = (curChar) => {
+       switch (curChar) {
+        case '#': return flagsObj.h1 === true ? '<h1>' : '</h1>'
+       }
+    //return tag
+}
 
 const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to take value to OUTPUT to  show processed only text 
 
+    log('procTXT fired')
     
     if (special(lastChar(inVal))) { // if special, add Last to  Cache and Out
 
@@ -111,10 +120,7 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
            //log('0-0')
            
         out += lastChar(inVal) //(readyTXT === undefined|| readyTXT.length === 0)  ? lastChar(inVal) : 
-        
-        
-        
-            
+
             return  [inVal, out]
         }
         else { // (special(prevChar(inVal)) === true)
@@ -140,21 +146,47 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
     
     }
 
-const processorBS = (inVal,charBS) => { /// MAKE THIS
-  
+const processorBS = (inVal,char) => { /// MAKE THIS
 
+    log('proc BS fired')
+    //
+   
+    const tagOpen = () => {
 
+        return inVal.slice(-3) === '/' ? true : false // hardcoded to h1-h2-h3 tags
+    }
+    const newDefaultBSEdit = ()=> edit.slice(0,-1)
+    const newDefaultBSReadyTXT =()=> readyTXT.slice(0,-1)
+    // const newTagBSReadyTXT = (tag) => tagOpen(tag) === true ? readyTXT.slice(0,-1) : readyTXT.slice(0,-tag.length)
+
+    /// if special -> how many chars to BS? 
+    /// define tag, tag is opened? , 
+
+    if (special(char) === true) {
+        log('BS special')
+        return //newTagBSReadyTXT(char) 
+    }
+    
+        
+    /// HOW TO CHECK OPEN-CLOSED tag - if '<' is not slice(-4?) then TAG is ClosingTag 
+    /// ? if deleting tag then change tagFlag due to OPEN or Closing tag to delete
+
+    
+    else {
+        setCharBS(''); setCharBSflag(false)
+    return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]
+    }
+
+    
 }
 
+
 const handleIn = (e) => {
-   // e.preventDefault()
-    //log('001 flags', flags)
    
     const inputString = e.target.value
     setPreIn(inputString)
 
     return 
-  
 }
 
 const handleBS =(e) => {
@@ -170,31 +202,6 @@ e.preventDefault()
         setCharBSflag(true) // flag BS to decide which Processor to use
 
       setPreIn(preIn.slice(0,-1)) // delete char in preIn
-    //setBSF(true)
-
-    //log('lastChar in proc:', lastChar(inVal))
-
-    //  BS flag check condition 
-    // if (bsf === true) {
-
-    //     setBSF(false)
-    //    //log('BS confirmed in Proc')
-    //    // out = processorBS(inVal)
-    //    log(' BSed char', BSedCurrChar)
-       
-    //    if (special(BSedCurrChar)===true) { // special BS
-    //     log('BS special')
-    //     log('tag BS', preIn.slice(0,-4))
-    //     return preIn.slice(0,-1)
-    //    }
-
-    //    // BS any tag by length - find length of tag, cut the tag
-
-    //    else {
-    //     log('BS default')
-    //     return  setPreIn(preIn.slice(0,-1)) // default BS
-    //    }
-    //}  - for BS flag check condition 
 
 } return 
 
@@ -203,15 +210,12 @@ e.preventDefault()
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
-    const processedTXT = processorTXT(preIn, readyTXT)
-    const processedBS = processorBS(preIn, charBS)
-
-   if (preIn.length >0) { // to not send empties in state
+    if (preIn.length >0) { // to not send empties in state
 
     if (charBSflag === true) {
-        log('we BS', charBS)
+        log('we proc BS', charBS)
         setEdit(preIn)
-        setReadyTXT(processedBS)
+        setReadyTXT(processorBS(preIn, charBS)[1])
     }
     
 
@@ -220,7 +224,7 @@ useLayoutEffect(()=>{                 //triggering Text Processor and sync edito
     log('add Char', preIn)
         setEdit(preIn)
 
-        setReadyTXT(processedTXT[1])
+        setReadyTXT(processorTXT(preIn, readyTXT)[1])
     }
 
 }
@@ -293,5 +297,4 @@ const Preview = (props) => {  //const { eDisp }  = props
 
 export default Markdown;
 
-//
 
