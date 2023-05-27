@@ -7,13 +7,16 @@ const Markdown = () => {
 
 
 const [preIn, setPreIn] = useState('') // inputing state
+//const [preInLen, setPreInLen] = useState(0) // inputing state
 const [edit, setEdit] = useState('') // //Shows Input
  
-
+const [charBS, setCharBS] = useState('') // deleted char, BS flag 
+const [charBSflag, setCharBSflag] = useState(false) // deleted char, BS flag 
 
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
 const [cache, setCache] = useState([])
-const [bsf,setBSF] = useState(false)
+//const [bsf,setBSF] = useState(false)
+
 
 
 const flagsObj  = 
@@ -90,17 +93,8 @@ const convert = (proTag) => {
 
 const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to take value to OUTPUT to  show processed only text 
 
-    log('lastChar in proc:', lastChar(inVal))
-
-    if (bsf === true) {
-
-        setBSF(false)
-
-       // out = processorBS(inVal)
-        return [inVal, out.slice(0,-1)] //out
-    }
-
-    else if (special(lastChar(inVal))) { // if special, add Last to  Cache and Out
+    
+    if (special(lastChar(inVal))) { // if special, add Last to  Cache and Out
 
         //log('S')
         setCache(cache.concat(lastChar(inVal)))
@@ -146,47 +140,14 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
     
     }
 
-const processorBS = (inBS,flag) => { /// MAKE THIS
-    let tagBS
-    let tagBSLength
+const processorBS = (inVal,charBS) => { /// MAKE THIS
+  
 
-    const newSpecial = (oldVal, specChar) => {
 
-        const findSpecial = () => {
-             
-            return  
-        }
-
-        return
-    }
-
-    if (special(lastChar(inBS))===true) {
-
-        if (special(prevChar(inBS)) === true && 
-                (lastChar(inBS) !== prevChar(inBS)))
-                {
-        return processorBS(inBS, lastChar(inBS)) // no affecting on flags
-        }
-
-        else if (special(prevChar(inBS)) === true && 
-                    (lastChar(inBS) === prevChar(inBS)))
-            {
-                
-                return processorBS(inBS, newSpecial(inBS))
-            }
-
-        else return inBS.slice(0,-1) // no TAG founded
-
-        // 
-        // reFlagged(in)
-    }
-    else
-
-    return log('processor BS')
 }
 
 const handleIn = (e) => {
-
+   // e.preventDefault()
     //log('001 flags', flags)
    
     const inputString = e.target.value
@@ -199,33 +160,68 @@ const handleIn = (e) => {
 const handleBS =(e) => {
     
 if (e.key === 'Backspace' && preIn.length >0) {
+e.preventDefault()
 
-    log('BACKSPACE')
-    setBSF(true)
-    //  setEdit(edit.slice(0,-1))
-    //  setReadyTXT(readyTXT.slice(0,-1))
-    
-    
+    let BSedCurrChar = preIn.slice(-1)
+
+     log('BS pressed, ?char = ', BSedCurrChar)
+
+        setCharBS(BSedCurrChar) // BSed character we analyze for proper BS
+        setCharBSflag(true) // flag BS to decide which Processor to use
+
+      setPreIn(preIn.slice(0,-1)) // delete char in preIn
+    //setBSF(true)
+
+    //log('lastChar in proc:', lastChar(inVal))
+
+    //  BS flag check condition 
+    // if (bsf === true) {
+
+    //     setBSF(false)
+    //    //log('BS confirmed in Proc')
+    //    // out = processorBS(inVal)
+    //    log(' BSed char', BSedCurrChar)
+       
+    //    if (special(BSedCurrChar)===true) { // special BS
+    //     log('BS special')
+    //     log('tag BS', preIn.slice(0,-4))
+    //     return preIn.slice(0,-1)
+    //    }
+
+    //    // BS any tag by length - find length of tag, cut the tag
+
+    //    else {
+    //     log('BS default')
+    //     return  setPreIn(preIn.slice(0,-1)) // default BS
+    //    }
+    //}  - for BS flag check condition 
+
 } return 
 
     
 }
 
-useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> at Display /// I use it to sync editor and ReadyTXT
-     //log('preIn in Effect',preIn)
+useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
-
-    const processedTXT = processorTXT(preIn, readyTXT) 
-    
-    //const processedBS = 
-    
+    const processedTXT = processorTXT(preIn, readyTXT)
+    const processedBS = processorBS(preIn, charBS)
 
    if (preIn.length >0) { // to not send empties in state
 
+    if (charBSflag === true) {
+        log('we BS', charBS)
+        setEdit(preIn)
+        setReadyTXT(processedBS)
+    }
+    
 
+   else {
+
+    log('add Char', preIn)
         setEdit(preIn)
 
         setReadyTXT(processedTXT[1])
+    }
 
 }
   else {log('empties')}
@@ -273,7 +269,7 @@ const Preview = (props) => {  //const { eDisp }  = props
         <div id='editor'>editor
         <div id='input-wrapper'>
         <label>
-            <textarea id='editor-area' onKeyDown ={handleBS} onChange={handleIn}></textarea>
+            <textarea id='editor-area' value ={preIn} onKeyDown ={handleBS} onChange={handleIn}></textarea>
         </label>
         
         </div>
@@ -297,58 +293,5 @@ const Preview = (props) => {  //const { eDisp }  = props
 
 export default Markdown;
 
-// const processorTXT0 = (inVal, out) => { /// sequentually change proc0 to proc foo and fix the error
-//         if (special(lastChar(inVal))) { //if (lastChar(inVal) === '#') {
+//
 
-//         // out += lastChar(inVal)
-//         // log('s')
-//         // log('out', out)
-        
-//         log('S')
-//         setCache(cache.concat(lastChar(inVal)))
-
-//         out += lastChar(inVal) //(readyTXT === undefined|| readyTXT.length === 0)  ? lastChar(inVal) : 
-//         log('readyTXT', readyTXT, 'caache', cache)
-       
-//         // let outVal = readyTXT
-//             return [inVal, out]
-//     }
-
-    
-//     else if (prevChar(inVal) !== '#' ) {
-
-//         out += lastChar(inVal)
-//     log('0-0')
-//     log('out', out)
-//     return [inVal,out]
-//     }
-//     else {
-
-//         //out += lastChar(inVal)
-//        log('1-0')
-//         log('out', out)
-        
-//         const changedOut = out.length ?  out.slice(0,-1).concat('<#>').concat(lastChar(inVal)) : lastChar(inVal)
-//         //log('lastChar', out.slice(-2,-1) )
-//         return [inVal,changedOut] //
-//     }
-// } 
-
-
-// else {
-//    log('1-0')
-//     log('out', out)
-//     const changedOut = out.slice(-2,-1).concat('<#>').lastChar(inVal)
-//     log('lastChar', out.slice(-2,-1) )
-
-//return [inVal,changedOut]
-    //log('procTest:', [inVal,changedTXT])
-
-
-// BACKSPACE handle
-
-//INSERT INSIDE TEXT - find place in EDIT and insert
-// if edit changed more than 1 char use Insert Foo -> find new text
-//, process char by char through Processor: part before insertion, and part after to USE PROPER FLAGS
-
-//for INSERT FOO - use varaible to cut the end of Edit after cursor position
