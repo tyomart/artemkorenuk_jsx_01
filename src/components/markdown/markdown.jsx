@@ -164,7 +164,7 @@ const processorBS = (inVal,char) => { /// MAKE THIS
 
     if (special(char) === true) {
         log('BS special')
-        return //newTagBSReadyTXT(char) 
+        return  [newDefaultBSEdit(), readyTXT.slice(0,-4) ]  // special BS
     }
     
         
@@ -174,7 +174,7 @@ const processorBS = (inVal,char) => { /// MAKE THIS
     
     else {
         setCharBS(''); setCharBSflag(false)
-    return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]
+    return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]        // default BS
     }
 
     
