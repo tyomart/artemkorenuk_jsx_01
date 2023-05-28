@@ -151,20 +151,23 @@ const processorBS = (inVal,char) => { /// MAKE THIS
     log('proc BS fired')
     //
    
-    const tagOpen = () => {
-
-        return inVal.slice(-3) === '/' ? true : false // hardcoded to h1-h2-h3 tags
+    const tagCut = () => {
+            
+        switch (char) {
+        case '#' : return 4
+        case '*' : return 3
     }
+
+    return 
+}
     const newDefaultBSEdit = ()=> edit.slice(0,-1)
     const newDefaultBSReadyTXT =()=> readyTXT.slice(0,-1)
-    // const newTagBSReadyTXT = (tag) => tagOpen(tag) === true ? readyTXT.slice(0,-1) : readyTXT.slice(0,-tag.length)
-
-    /// if special -> how many chars to BS? 
-    /// define tag, tag is opened? , 
-
-    if (special(char) === true) {
+   
+    if (special(char) === true) {       // special BS
         log('BS special')
-        return  [newDefaultBSEdit(), readyTXT.slice(0,-4) ]  // special BS
+
+        // defineTag (char) 
+        return  [newDefaultBSEdit(), readyTXT.slice(0,-tagCut(char)) ]  
     }
     
         
@@ -172,9 +175,9 @@ const processorBS = (inVal,char) => { /// MAKE THIS
     /// ? if deleting tag then change tagFlag due to OPEN or Closing tag to delete
 
     
-    else {
+    else {  // default BS
         setCharBS(''); setCharBSflag(false)
-    return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]        // default BS
+    return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]        
     }
 
     
