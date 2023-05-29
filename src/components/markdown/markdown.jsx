@@ -92,12 +92,7 @@ const convert = (proTag) => {
     else return proTag
 }
 
-const getTag = (curChar) => {
-       switch (curChar) {
-        case '#': return flagsObj.h1 === true ? '<h1>' : '</h1>'
-       }
-    //return tag
-}
+
 
 const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to take value to OUTPUT to  show processed only text 
 
@@ -146,14 +141,14 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
     
     }
 
-const processorBS = (inVal,char) => { /// MAKE THIS
+const processorBS = (inVal,char) => { 
 
-    log('proc BS fired')
-    //
-   
     const tagCut = () => {
             
         switch (char) {
+
+        case '###' : return 4
+        case '##' : return 4
         case '#' : return 4
         case '*' : return 3
     }
@@ -163,26 +158,56 @@ const processorBS = (inVal,char) => { /// MAKE THIS
     const newDefaultBSEdit = ()=> edit.slice(0,-1)
     const newDefaultBSReadyTXT =()=> readyTXT.slice(0,-1)
    
-    if (special(char) === true) {       // special BS
+    if (special(char) === true) {       // special BS // in further all newDefaultBSEdit to eliminate 
         log('BS special')
-
-        // defineTag (char) 
-        return  [newDefaultBSEdit(), readyTXT.slice(0,-tagCut(char)) ]  
-    }
+       
+        let specCounter = ''
+        const findEndSpecs = (txt,ch) => { //      define Tag length and number of same specs
+            const lastChar = txt.slice(-1) 
+            
+            if (txt.length > 0) {
     
+                if (lastChar === ch) {
+                    specCounter.concat(ch)
+                    return findEndSpecs(txt.slice(0,-1), ch)
+                }
+                else {
+                    log('specCounter', specCounter)   
+                    return specCounter
+                }
+            }
+    
+        return specCounter
+       }
+
+        const tagOpClos = (ch) => readyTXT.slice(-(tagCut(ch)),-(tagCut(ch)-1)) // get char on place of '/' in closing tag
         
-    /// HOW TO CHECK OPEN-CLOSED tag - if '<' is not slice(-4?) then TAG is ClosingTag 
-    /// ? if deleting tag then change tagFlag due to OPEN or Closing tag to delete
+        let tagToCut = tagCut(findEndSpecs(char))
+        let specsToCut = findEndSpecs(char)
 
-    
+        if (tagOpClos(char) === '/') { // !! SOLVE H1 hardcoded issue to any tag // return from tagCut 2 values for length and flag to Op - Close
+            setFlags({...flags,h1:true})
+          
+            log('after CLOSING Spec BS', readyTXT.slice(0,-(tagToCut+1)), 'flag h1', flags.h1 ) 
+
+                return [edit.slice(0,-specsToCut), readyTXT.slice(0,-(tagToCut+1)) ]  // check how many chars to cut from edit
+        } 
+        else { 
+            setFlags({...flags,h1:false})
+
+            log('closing char:',tagOpClos(char))
+            log('after simple Spec BS', readyTXT.slice(0,-tagToCut)  )
+
+            return  [newDefaultBSEdit(), readyTXT.slice(0,-tagToCut) ]  // change -tagCut to wholly working tag Cutter
+       }
+        }
+
     else {  // default BS
         setCharBS(''); setCharBSflag(false)
     return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]        
     }
-
-    
+  
 }
-
 
 const handleIn = (e) => {
    
@@ -211,16 +236,47 @@ e.preventDefault()
     
 }
 
+const handleTest = () => {
+
+    let specCounter = ''
+    const findEndSpecs = (txt,ch) => { //WHY it finds for  one char less than occurs 
+        const lastChar = txt.slice(-1) 
+        
+        if (txt.length > 0) {
+
+            if (lastChar === ch) {
+                specCounter  = specCounter.concat(ch)
+                return findEndSpecs(txt.slice(0,-1), ch)
+            }
+            else {
+                log('specCounter', specCounter)   
+                return specCounter
+            }
+        }
+
+    return specCounter
+   }
+   
+    let cca = '789'
+    //const aTest = {0:'#',1:'#',2:'*', 3:'##'}
+    const aTest = '0123456789</b>####'
+   
+   log('specs' , findEndSpecs(aTest, '#'))
+   
+    return 
+}
+
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
     if (preIn.length >0) { // to not send empties in state
 
     if (charBSflag === true) {
         log('we proc BS', charBS)
-        setEdit(preIn)
-        setReadyTXT(processorBS(preIn, charBS)[1])
+        let proceedBStxt = processorBS(preIn, charBS)
+        setPreIn(proceedBStxt[0]) // TO DO make proper cut of edit and preIN for multi specs case
+        setEdit(proceedBStxt[0])
+        setReadyTXT(proceedBStxt[1])
     }
-    
 
    else {
 
@@ -244,15 +300,7 @@ useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> a
 },[readyTXT])
 
 
-const handleTest = () => {
-    let cca = '789'
-    //const aTest = {0:'#',1:'#',2:'*', 3:'##'}
-    const aTest = '0123456789'
-   
-log('test:',aTest.slice(-2,-1))
-   
-    return 
-}
+
 
 const HtmlView = (props) => {  //const { eDisp }  = props
   
@@ -300,4 +348,35 @@ const Preview = (props) => {  //const { eDisp }  = props
 
 export default Markdown;
 
+//TO DO 
+// spec char in preIn and not a tag in readyTXT
+// several Specs in preIN - how to BS it? ## case and *# case
+
+//----------------------
+
+// BUG list 
+
+// - if special BS then after adding characters to textarea immediatly after BS readyTXT makes empty and nothing in output occures
+// makes to BS characters when adding new chars instead of normal input
+
+
+// THOUGHTS how to --------------
+
+//BS multiple specials belongs to current tag
+        // var A ) if special(prevChar(preIn)) -> find prev(prevChar) until is not the same and not special
+        // BS char, change special chars on txt and add same txt chars to readyTXT
+        
+        // then have to solve how to convert special
+
+
+
+////////// trash ----------------
+
+
+// const getTag = (curChar) => {
+//        switch (curChar) {
+//         case '#': return flagsObj.h1 === true ? '<h1>' : '</h1>'
+//        }
+//     //return tag
+// }
 
