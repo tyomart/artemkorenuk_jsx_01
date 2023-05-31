@@ -7,16 +7,14 @@ const Markdown = () => {
 
 
 const [preIn, setPreIn] = useState('') // inputing state
-//const [preInLen, setPreInLen] = useState(0) // inputing state
-const [edit, setEdit] = useState('') // //Shows Input
+const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
  
 const [charBS, setCharBS] = useState('') // deleted char, BS flag 
 const [charBSflag, setCharBSflag] = useState(false) // deleted char, BS flag 
 
-
 const [cache, setCache] = useState([])
-//const [bsf,setBSF] = useState(false)
+
 
 
 
@@ -30,8 +28,8 @@ const flagsObj  =
         i: false,
         code: false,
         code3: false,
-        //set neg_H1(val) { this.f_h1 = !val}, 
-  
+        
+        test:false, //test flag
     } 
 const [flags, setFlags] = useState( flagsObj )
 //  log('000 flags', flags)
@@ -63,7 +61,7 @@ const convert = (proTag) => {
         
         //exclusion cases are expected here
 
-        log('outval fired')
+       // log('outval fired')
        return !flags[`${tag}`]         //basic case
             ? `<${tag}>` : `</${tag}>`   
     }
@@ -75,7 +73,7 @@ const convert = (proTag) => {
             return tagger('h1',0);
             }
     if (proTag === '##')                     // <h1> tag
-            {log('# fired')
+            {log('## fired')
                 setFlags({...flags, h2:!(flags.h2)})
             return tagger('h2',0);
             }
@@ -142,8 +140,8 @@ const processorTXT = (inVal, out) => { // MOST HOT ISSUE - from where I have to 
     }
 
 const processorBS = (inVal,char) => { 
-
-    const tagCut = () => {
+  
+    const tagCut = () => { //numbers of chars to cut depends of tag
             
         switch (char) {
 
@@ -155,12 +153,21 @@ const processorBS = (inVal,char) => {
 
     return 
 }
-    const newDefaultBSEdit = ()=> edit.slice(0,-1)
-    const newDefaultBSReadyTXT =()=> readyTXT.slice(0,-1)
-   
-    if (special(char) === true) {       // special BS // in further all newDefaultBSEdit to eliminate 
+    const tag = () => { //numbers of chars to cut depends of tag
+            
+        switch (char) {
+
+        case '###' : return '<h3>'
+        case '##' : return '<h2>'
+        case '#' : return '<h1>'
+        case '*' : return '<b>'
+    }
+      //return 
+}
+
+    if (special(char) === true) {       // special BS // char = lastChar(preIn)
         log('BS special')
-       
+
         let specCounter = ''
         const findEndSpecs = (txt,ch) => { //      define Tag length and number of same specs
             const lastChar = txt.slice(-1) 
@@ -172,7 +179,7 @@ const processorBS = (inVal,char) => {
                     return findEndSpecs(txt.slice(0,-1), ch)
                 }
                 else {
-                    log('specCounter', specCounter)   
+                   //log('specCounter', specCounter)   
                     return specCounter
                 }
             }
@@ -180,33 +187,33 @@ const processorBS = (inVal,char) => {
         return specCounter
        }
 
-        const tagOpClos = (ch) => readyTXT.slice(-(tagCut(ch)),-(tagCut(ch)-1)) // get char on place of '/' in closing tag
-        
-        let tagToCut = tagCut(findEndSpecs(char))
-        let specsToCut = findEndSpecs(char)
+       // const tagOpClos = (ch) => readyTXT.slice(-(tagCut(ch)),-(tagCut(ch)-1)) // get char on place of '/' in closing tag
+       // let tagToCut = tagCut(findEndSpecs(char))
+       let remaindTag = tag(findEndSpecs(inVal.slice(0,-1),char))
+       let tagToCut = tag(remaindTag).length;
 
-        if (tagOpClos(char) === '/') { // !! SOLVE H1 hardcoded issue to any tag // return from tagCut 2 values for length and flag to Op - Close
-            setFlags({...flags,h1:true})
-          
-            log('after CLOSING Spec BS', readyTXT.slice(0,-(tagToCut+1)), 'flag h1', flags.h1 ) 
+       // check for open-close tag to cut
+       log('newtag', remaindTag, 'tagToCut', tagToCut)
+       setCharBS(''); setCharBSflag(false)
+       return [remaindTag,tagToCut]// what to add if multiole specs, what to cut
 
-                return [edit.slice(0,-specsToCut), readyTXT.slice(0,-(tagToCut+1)) ]  // check how many chars to cut from edit
-        } 
-        else { 
-            setFlags({...flags,h1:false})
 
-            log('closing char:',tagOpClos(char))
-            log('after simple Spec BS', readyTXT.slice(0,-tagToCut)  )
-
-            return  [newDefaultBSEdit(), readyTXT.slice(0,-tagToCut) ]  // change -tagCut to wholly working tag Cutter
-       }
-        }
+        } //  end of 'special char = true'
 
     else {  // default BS
+        log('defualt BS')
         setCharBS(''); setCharBSflag(false)
-    return [newDefaultBSEdit(), newDefaultBSReadyTXT() ]        
+    return ['', 1]  // .slice(-1) in states      
     }
-  
+
+
+
+       // how procBS works -> 
+       // if currChar is special
+            // find whole tag - curr spec char - findEndSpecs
+             // find open or closed the tag
+            // return [what delete in preIn and Edit, what delete from readyTXT]
+        // if not special just cut 1 char
 }
 
 const handleIn = (e) => {
@@ -259,12 +266,22 @@ const handleTest = () => {
    
     let cca = '789'
     //const aTest = {0:'#',1:'#',2:'*', 3:'##'}
-    const aTest = '0123456789</b>####'
+    const aTest = '0123456789</b>#'
    
    log('specs' , findEndSpecs(aTest, '#'))
    
+   setFlags({...flags, test: !flags.test})
     return 
 }
+
+useLayoutEffect(() => { // TEST layout FX
+
+    setPreIn (preIn.slice(0,-2))
+    setEdit (edit.slice(0,-2))
+
+    log('tested preIn', preIn, 'edit', edit)
+    return
+},[flags.test])
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
@@ -273,9 +290,9 @@ useLayoutEffect(()=>{                 //triggering Text Processor and sync edito
     if (charBSflag === true) {
         log('we proc BS', charBS)
         let proceedBStxt = processorBS(preIn, charBS)
-        setPreIn(proceedBStxt[0]) // TO DO make proper cut of edit and preIN for multi specs case
-        setEdit(proceedBStxt[0])
-        setReadyTXT(proceedBStxt[1])
+        log('FX', proceedBStxt[0],'cut',proceedBStxt[1])
+        setReadyTXT(readyTXT.slice(0,-proceedBStxt[1]).concat(proceedBStxt[0])) // slice tag, add remainder if multiple specs
+       
     }
 
    else {
@@ -349,15 +366,17 @@ const Preview = (props) => {  //const { eDisp }  = props
 export default Markdown;
 
 //TO DO 
-// spec char in preIn and not a tag in readyTXT
-// several Specs in preIN - how to BS it? ## case and *# case
+// a) NOW -- use converter to change remained spec and tag in inpur and ready
+// b) MAKE IT LATER USING Handle foo not FX. find a way to not chage preIn after BS whole tag in preIn, edit and ready
 
 //----------------------
 
 // BUG list 
 
-// - if special BS then after adding characters to textarea immediatly after BS readyTXT makes empty and nothing in output occures
+// 1) if special BS then after adding characters to textarea immediatly after BS readyTXT makes empty and nothing in output occures
 // makes to BS characters when adding new chars instead of normal input
+// sometimes BS add lastChar of preIn to readyTXT
+// 1) answer - bcause preIn changes and FX call to procTXT to add lastChar
 
 
 // THOUGHTS how to --------------
@@ -378,5 +397,16 @@ export default Markdown;
 //         case '#': return flagsObj.h1 === true ? '<h1>' : '</h1>'
 //        }
 //     //return tag
+// }
+// OPENCLOSE BS
+// if (tagOpClos(char) === '/') { // decide how many chars BS for closed-open tags
+//     setFlags({...flags,h1:true}) // !! SOLVE H1 hardcoded issue to any tag 
+//   //log('closing / detected') //log('after CLOSING Spec BS', readyTXT.slice(0,-(tagToCut+1)), 'flag h1', flags.h1 ) 
+    
+//         return [inVal.slice(0,-tagToCut), readyTXT.slice(0,-(tagToCut+1)) ]  // return BS for </tag>
+// } 
+// else { 
+//     setFlags({...flags,h1:false})
+//     return [inVal.slice(0,-tagToCut) , readyTXT.slice(0,-tagToCut) ]  //  return BS for open <tag>
 // }
 
