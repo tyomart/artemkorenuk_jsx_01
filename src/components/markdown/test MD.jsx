@@ -1,14 +1,10 @@
 
 import './markdown-styles.less'
-import { useState, useContext, useEffect,  useLayoutEffect, useReducer } from 'react'
+import { useState, useContext, useEffect, useReducer } from 'react'
 import $ from 'jquery';
 
 const log = console.log
 const Markdown = () => {
-
-    const [preIn, setPreIn] = useState('') // inputing state
-const [edit, setEdit] = useState('') // //what Shows in editor
-const [readyTXT, setReadyTXT] = useState('') //Shows Output
 
 //let cacheSpec = ''
 let flags  = 
@@ -89,14 +85,6 @@ const testTXT = (txt) => {
 
 }
 
-const handleIn = (e) => {
-   
-    const inputString = e.target.value
-    setPreIn(inputString)
-
-    return 
-}
-
 const handleTest = () => {
 
     let cca = '789'
@@ -106,74 +94,7 @@ const handleTest = () => {
    
     return 
 }
-
-useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
-
-    if (preIn.length >0) { // to not send empties in state
-
-  
-        setEdit(preIn)
-
-        setReadyTXT(testTXT(preIn))
-    }
-    else {log('empties')}
-},[preIn])
-
-
-
-
-useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> at Display
-   
-    const $outP = $('#output') 
-    const html = $outP.html()
-    const newHtml = html + readyTXT
-    $outP.html(newHtml)
-   return 
-},[readyTXT])
-
-// Components for out ----------------------
-
-const HtmlView = (props) => {  //const { eDisp }  = props
-  
-    // HTML RETURN
-    return <>
-       <div id='html_view'><p>{readyTXT}</p></div> 
-    </>
-} 
-const Preview = (props) => {  //const { eDisp }  = props
-  
-    // PREVIEW RETURN
-    return <>
-       <div id='output'><p>{}</p></div> 
-    </>
-} 
-
-//BIG RETURN before OUTPUT ---------------------------------
-    return <> 
-
-    <div>Markdown (under construct.)</div>
-        <div id='editor'>editor
-        <div id='input-wrapper'>
-        <label>
-            <textarea id='editor-area' value ={preIn}  onChange={handleIn}></textarea> 
-            {/* onKeyDown ={handleBS} */}
-        </label>
-        
-        </div>
-    
-    </div>
-    <div id='html-view-area'> <div id='html-area-header'>HTML</div> <br/>
-        <HtmlView htmlDisp = {readyTXT}></HtmlView>
-
-    </div>
-    <br></br>
-    <div id='preview'>
-       
- 
-        <Preview eDisp={readyTXT}/> 
-    </div> 
-
-
+return <> 
 
 <div>Markdown (under construct.)</div>
 
