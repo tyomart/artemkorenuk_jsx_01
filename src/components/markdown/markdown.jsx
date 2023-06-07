@@ -25,6 +25,8 @@ let flags  =
         ul: true,
         ol: true,
         li: true,
+        code1: true,
+        codeBlock: true,
         cacheSpec:'',
         
         test:false, //test flag
@@ -39,7 +41,7 @@ const convert = (proTag ) => { //cash, char, j, txtAr
 
     const tagOpClos = (tag) => { // open/closed tag substitution
         //exclusion cases are expected here
-       return !flags[`${tag}`]         //basic case
+       return flags[`${tag}`]         //basic case
             ? `<${tag}>` : `</${tag}>`   
     }
    
@@ -74,6 +76,47 @@ const convert = (proTag ) => { //cash, char, j, txtAr
                 flags = {...flags, i:!(flags.i)}
             return tagOpClos('i');
             }
+       
+    if (proTag === '\`')                     // <h1> tag
+            {
+                flags = {...flags, code1:!(flags.code1)}
+            return tagOpClos('code');
+            }
+    if (proTag === '\`\`\`')                     // <h1> tag
+            {
+                flags = {...flags, codeBlock:!(flags.codeBlock)}
+            return tagOpClos('code');
+            }
+    if (proTag === 'ul')                     // <h1> tag
+            {
+                flags = {...flags, ul:!(flags.ul)}
+            return tagOpClos('ul');
+            }
+    if (proTag === 'li')                     // <h1> tag
+            {
+                flags = {...flags, li:!(flags.li)}
+            return tagOpClos('li');
+            }
+        if (proTag === 'ol')                     // <h1> tag
+                {
+                    flags = {...flags, ol:!(flags.ol)}
+                return tagOpClos('ol');
+                }
+        if (proTag === 'th')                     // <h1> tag
+                {
+                    flags = {...flags, codeBlock:!(flags.codeBlock)}
+                return tagOpClos('code');
+                }
+        if (proTag === 'td')                     // <h1> tag
+                {
+                    flags = {...flags, codeBlock:!(flags.codeBlock)}
+                return tagOpClos('code');
+                }
+        if (proTag === 'tr')                     // <h1> tag
+                {
+                    flags = {...flags, tr:!(flags.tr)}
+                return tagOpClos('tr');
+                }
         }
 
 const convertEndStr = () => {
@@ -92,139 +135,141 @@ const convertEndStr = () => {
     }
     else return ''
 } 
-const bReplace = (txt) => {
-    // log('b fired')
-    if (txt.match(/\*\*/)) { //(txt.match(/.*\*\*/))
+// const bReplace = (txt) => {
+//     // log('b fired')
+//     if (txt.match(/\*\*/)) { //(txt.match(/.*\*\*/))
         
-        txt = txt.replace(/\*\*/, convert('**'))
+//         txt = txt.replace(/\*\*/, convert('**'))
         
-    return bReplace(txt)
+//     return bReplace(txt)
+//     }
+//     else {
+//         //log('txt else', txt)
+//         return txt}
+
+// }
+
+// const iReplace = (txt) => {
+// if (txt.match(/\_/)) { //(txt.match(/.*\*\*/))
+        
+//     txt = txt.replace(/\_/, convert('_'))
+    
+// return iReplace(txt)
+// }
+// else {
+//     //log('txt else', txt)
+//     return txt}
+//   }
+
+const uniReplace = (txt, type) => {
+    let regex = '', toTag = ''
+    
+    switch (type) {
+        case 'b': regex = /\*\*/;  toTag = '**';break
+        case 'i': regex = /\_/;  toTag = '_';break
+        case '\`': regex = /\`/;  toTag = '`';break
+    }
+    if (txt.match(regex)) { //(txt.match(/.*\*\*/))
+        
+        txt = txt.replace(regex, convert(toTag))
+        
+    return uniReplace(txt, type)
     }
     else {
         //log('txt else', txt)
         return txt}
-
 }
-
-const iReplace = (txt) => {
-if (txt.match(/\_/)) { //(txt.match(/.*\*\*/))
-        
-    txt = txt.replace(/\_/, convert('_'))
-    
-return iReplace(txt)
-}
-else {
-    //log('txt else', txt)
-    return txt}
-  }
 
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
 
   // withBracketsExchange -> linkPlaceholdReplace, imgPlaceholdReplace, -> i-b change -> makeLinks (back) -> makeHtmlLinks -> return txt
 const process = (inStr) => {
 
-//let storeLinks = []
-//let storeImgs = []
-let storeCode = []
-let count = 1
+    
+
     const withBracksReplace  = (preStr) => {
-        //log('str', str, '~~', count++)
-        //str ='####dl_fabcdee_[_kk_mm](123zz_yy567)z_bcd[_k1_mm](123zz_67)__[_kk_1mm]' // test str
-        const linkPlaceholdReplace = (txt) => {
-            //log('aTxt', txt)
-            let matching =  txt.match(/\[(.*?)\]\((.*?)\)/g )
-            log('matching', matching)
-            let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
         
-            txt = txt.replace( /\[(.*?)\]\((.*?)\)/g, '©©©')
+        const linkPlaceholdReplace = (txt,type) => {
+
+            let regex = ''; let stub = ''
+            switch (type){
+                case 'link': regex = /\[(.*?)\]\((.*?)\)/g ; stub = '©©©';break;
+                case 'img': regex = /\!\[(.*?)\]\((.*?)\)/g ; stub = '©~©';break;
+                // case 'code': regex = /^\`\`\`(.*?)\]\((.*?)\)/g ; stub = '©~coblock~©';break;
+            }   
+            let matching =  txt.match(regex)
+            let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
+            txt = txt.replace( regex, stub)
         
             return [txt, storageLink]
         }
-        const imgPlaceholdReplace = (txt) => {
-            //log('aTxt', txt)
-            let matching =  txt.match(/\!\[(.*?)\]\((.*?)\)/g )
-            log('Img matching', matching)
-            let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
-        
-            txt = txt.replace( /\!\[(.*?)\]\((.*?)\)/g, '©~©')
-        log('placehold Imgs', txt)
-            return [txt, storageLink]
-        }
-        const linkInverseReplace  = (txt, store) =>  { // Invert Links Conversion
-        
-        //log('bTxt', txt, 'store', store )
+
+        const linkInverseReplace  = (txt, store, type) =>  { // Invert Links Conversion
+
+            let regexStub = ''
+            switch(type){
+                case 'link':  regexStub = '©©©'; break
+                case 'img':  regexStub = '©~©'; break
+                // case 'code1':  regexStub = '©~coblock~©'; break
+                default:  regexStub = ''; break
+            }
+
+            let regexGlob = new RegExp(regexStub,'g'); let regexNoGlob = new RegExp(regexStub);
             return store.length > 0 
             ? store.reduce((acc,elem) => {  
-                //const regexInvert = /©©©/
-                //log('inverse Replace fired - elem', elem);
-                let matchCPR = txt.match(/©©©/g) 
+
+                let matchCPR = txt.match(regexGlob) 
 
                 if (matchCPR!==null) 
-
-                    { txt = txt.replace(/©©©/, elem);//log('newTxt', txt)
+                    { txt = txt.replace(regexNoGlob, elem);
                     return acc = txt}
                 else return acc = txt
             }, '' ) 
         :txt;} // end of ternary 
 
-        const imgInverseReplace  = (txt, store) =>  { // Invert Links Conversion
-        
-        //log('bTxt', txt, 'store', store )
-            return store.length > 0 
-            ? store.reduce((acc,elem) => {  
-                //const regexInvert = /©©©/
-                //log('inverse Replace fired - elem', elem);
-                let matchCPR = txt.match(/©~©/g) 
-
-                if (matchCPR!==null) 
-
-                    { txt = txt.replace(/©~©/, elem);//log('newTxt', txt)
-                    return acc = txt}
-                else return acc = txt
-            }, '' ) 
-            :txt;} // end of ternary 
-        
-        const makeHtmlLinks = (txt) => {                // LInk Invert conversion   
-            // log('cTxt', txt)
-                const regexToLinkMatch = /\[(.*?)\]\((.*?)\)/g
-            if (txt.match(regexToLinkMatch) !== null) {
-
-                    const regexToHtml=  /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g 
-                    txt = txt.replace(regexToHtml,"$<txt1><a href='$<url>'>$<link></a>$<txt2>")
-                return makeHtmlLinks(txt)
-            }
-            else return txt 
+        const makeHtml = (txt,type) => {                // LInk Invert conversion   
+       
+        let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
+        switch(type) {
+            case 'link': 
+                regexToMatch =  /\[(.*?)\]\((.*?)\)/g; //log('link fired', txt.match(regexToMatch)); 
+                regexToHtml =   /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g  ;
+                regexToSubstGroups = `$<txt1><a href="$<url>">$<link></a>$<txt2>`;
+                break;
+            case 'img': 
+                regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
+                regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
+                regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
+                break;
+            // case 'code': 
+            //     regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
+            //     regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
+            //     regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
+            // break;
         }
-        const makeHtmlImg = (txt) => {                // LInk Invert conversion   
-            //log('makeHtmlImg inTXT', txt)
 
-                const regexToImgMatch = /\!\[(.*?)\]\((.*?)\)/g
-            if (txt.match(regexToImgMatch) !== null) {
-
-                    const regexToHtml=  /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g     
-                    txt = txt.replace(regexToHtml,`$<txt1><img src='$<url>' alt="$<alt>"/>$<txt2>`)
-                 
-                return makeHtmlImg(txt)
-            }
-            else return txt 
+        if (txt.match(regexToMatch) !== null) { 
+            txt = txt.replace(regexToHtml,regexToSubstGroups)
+        return makeHtml(txt, type)
+    }
+    else return txt 
         }
    
-       let [pre1str,storeImgs] =  imgPlaceholdReplace(preStr) 
-        let [str,storeLinks] =  linkPlaceholdReplace(pre1str) 
-        
 
+       let [pre1str,storeImgs] =   linkPlaceholdReplace(preStr, 'img') 
+       let [str,storeLinks] =   linkPlaceholdReplace(pre1str, 'link')  
 
-        // //replacing
-        str = iReplace(str) //invoke iReplace here
-        str = bReplace(str)
+        str = uniReplace(str,'b')
+        str = uniReplace(str,'i')
 
-        //get back transformed brackets
-        str = imgInverseReplace (str,storeImgs)
-        str = linkInverseReplace (str,storeLinks)
+        // //get back transformed brackets
+        str = linkInverseReplace (str,storeImgs, 'img' )
+        str = linkInverseReplace (str,storeLinks, 'link')
       
-         str = makeHtmlImg(str)
-        str = makeHtmlLinks(str)
-       log('finally str', str)
+      
+         str = makeHtml(str, 'img')
+         str = makeHtml(str, 'link')
+  
         return str
         } // withBracketsReplace end
 
@@ -235,7 +280,6 @@ let count = 1
    inStr = inStr.match(/^##.*$/) ? inStr.replace(/^##/, convert('##')) : inStr
    inStr = inStr.match(/^#.*$/) ? inStr.replace(/^#/, convert('#')) : inStr
  
-   //inStr = inStr.replace(/$/, convertEndStr())
    withBracksReplace(inStr)
 return inStr // return of process()
 }
@@ -256,13 +300,12 @@ const handleIn = (e) => {
 }
 
 const handleTest = () => {
-   
-  
-   const aTest = '#z_#c_**[i_g**en](http://g_p**e.ru/8_.j)zd##![google.com](http://goo_**x.com)fg_**h##_id![li_nk](http://ya_**x.ru) 12v_**'
+
+   const aTest = `z_#c_**[i_g**en](http://g_p**e.ru/8_.j)zd##![google.com](http://goo_**x.com)fg_**h##_id![li_nk](http://ya_**x.ru) 12v_**`
 
   
     process(aTest)
-    return log('process ->', '\n', )// process(aTest)
+    return log('process ->', '\n', process(aTest))// process(aTest)
 }
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
@@ -276,9 +319,6 @@ useLayoutEffect(()=>{                 //triggering Text Processor and sync edito
     }
     else {log('empties')}
 },[preIn])
-
-
-
 
 useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> at Display
    
@@ -394,113 +434,27 @@ export default Markdown;
 
 /// GBG ----------------
 
-// const imgToTagReplace  = (txt) => {
-//     //txt = '#zb#c**zd##fg**h##_iabcd[hereisLINK](http://yandex.ru) 123zxcv'
-//     let regex  = /(?<txt1>.*)(?<!_)\!\[(?<altTxt>.*?)\]\((?<url>.*?)\)(?!_)(?<txt2>.*)/
+// const makeHtmlLinks = (txt) => {                // LInk Invert conversion   
+//     const regexToHtml=  /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g 
+//         const regexToMatch = /\[(.*?)\]\((.*?)\)/g //Link
+//         let regexToSubstGroups = '$<txt1><a href="$<url>">$<link></a>$<txt2>'
 
-//     let groups = txt.match(regex).groups
-//     txt = txt.replace(regex, `${groups.txt1} <img src='${groups.url}' alt ='${groups.altTxt}'/> ${groups.txt2}`)
-//     //txt = '<a href ="'+groups.url+'">'+groups.link+'</a>'
-//     return txt
+//     if (txt.match(regexToMatch) !== null) {
+//             txt = txt.replace(regexToHtml, regexToSubstGroups)
+//         return makeHtmlLinks(txt)
+//     }
+//     else return txt 
 // }
+// const makeHtmlImg = (txt) => {                // LInk Invert conversion   
 
+//     const regexToHtml=  /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g 
+//         const regexToMatch = /\!\[(.*?)\]\((.*?)\)/g //Img
+//         let  regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`
 
-// const regex = (type) => { switch (type) {
-//     case 'link': return /\[(.*?)\]\((.*?)\)/g 
-//     case 'img': return /\!\[(.*?)\]\((.*?)\)/g
-//     default: return /©/
-// }}
-
-// const placeholder = (type) =>{switch (type) {
-//     case 'link': return '©©©'
-//     case 'img': return '©~©'
-//     default: return ''
-// }}
-
-
-// const placeholdBrackets = (txt, typeOfData) => {
-//     let storage = []
-//     //log(typeOfData, 'regex', regex(typeOfData), 'txt', txt)
-//      const matching = txt.match(regex(typeOfData)) // match ()[]
- 
-//      storage = matching !==null // collect links
-//         ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) 
-//      : [] 
- 
-//      txt = txt.replace(regex(typeOfData),placeholder(typeOfData)) // replace all links  
-//     // log('placehold Brackets', '\n txt: ',  txt , '\n storage: ',  storage,  '\n placeholder: ', placeholder(typeOfData) )
-//      return [txt, storage, placeholder(typeOfData)] // ATTENTION! array returned
-//   }
-
-
-// const makeLinks = (txt, store, typeOf) => 
-// store.length > 0 
-// ? store.forEach(elem => {  // Invert Links Conversion + adding Links as Tags
-//     const regexInvert = (type) =>{switch (type) {
-//         case 'link': return /©©©/
-//         case 'img': return /©~©/
-//         default: return ''
-//     }}
-//     let matchCPR = txt.match(regexInvert(typeOf)) 
-
-//     if (matchCPR!==null) 
-
-//         { txt = txt.replace(regexInvert(typeOf), elem)
-//             log('repl w elem',txt );
-            
-//             txt = linkToTagReplace(typeOf)
-
-//         return txt}
-//     else return txt
-// } ) 
-// : store
-
-// const linkToTagReplace = (txt, type) => {                // LInk Invert conversion   
-        
-//     const regexToTag = (type) => {
-
-//         switch(type) {
-//             case 'link': return /(?<txt1>.*)\[(?<link>.*?)\]\((?<url>.*?)\)(?<txt2>.*)/
-//             case 'img': return /(?<txt1>.*)\!\[(?<link>.*?)\]\((?<url>.*?)\)(?<txt2>.*)/
-//             case 'code': return /(.*)?\`\`\`(?<code>.*)\`\`\`(.*)?/ // CHECK for issues
-//         }
+//     if (txt.match(regexToMatch) !== null) { 
+//             txt = txt.replace(regexToHtml,regexToSubstGroups)
+//         return makeHtmlImg(txt)
 //     }
-
-//      const groups = txt.match(regexToTag).groups
-//     const txtToTag = (type) => {
-//         switch (type) {
-//             case 'link': return `${groups.txt1} <a href='${groups.url}'/a> ${groups.link} </a>${groups.txt2}`
-//             case 'img': return  `${groups.txt1} <img src='${groups.url}' alt ='${groups.altTxt}'/> ${groups.txt2}`
-//             case 'code': return `<code>${groups.code}'/code>` // CHECK for issues
-//         }
-
-//     }
-    
-//      txt = txt.replace(regexToTag(type),txtToTag(type))
-//      //txt = '<a href ="'+groups.url+'">'+groups.link+'</a>'
-//      return txt
-//  }
-
-// let tag = '####' --------------how to transform string in regex and automate grid conversion foo
-// let regexGridMatch = `^${tag}.*$`
-// let regexGridReplace = `/^${tag}`
-// log('regex', regexGridMatch)
-// inStr = inStr.match(/${regexGridMatch}/) ? inStr.replace(regexGridReplace, convert(tag)) : inStr
-
-
-//    const temp2Test = () => {
-//         const regex = /\!\[(.*?)\]\((.*?)\)/g;
-
-//             // Alternative syntax using RegExp constructor
-//             // const regex = new RegExp('\\!\\[(.*?)\\]\\((.*?)\\)', 'gm')
-
-//             const str = `#z_#c_**[i_g**en](http://g_p**e.ru/8_.j)zd##![google.com](http://goo_**x.com)fg_**h##_id![li_nk](http://ya_**x.ru) 12v_**`;
-//             const subst = `&&&`;
-
-//             // The substituted value will be contained in the result variable
-//             const result = str.replace(regex, subst);
-
-//             console.log('Substitution result: ', result);
-//         return
-//     }
+//     else return txt 
+// }
 

@@ -68,3 +68,43 @@ return <>
 export default Test;
 
 
+     
+// let regexToLinkMatch = ''
+// let regexToHtml=  ''
+// let  regexToSubstGroups = ""
+// log('toHtml', type, txt)
+// switch(type) {
+//     case 'link': 
+//         regexToLinkMatch = /\[(.*?)\]\((.*?)\)/g;
+//         regexToHtml=  /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g ;
+//         regexToSubstGroups = "$<txt1><a href='$<url>'>$<link></a>$<txt2>";
+//         break;
+//     case 'img': 
+//         regexToLinkMatch = /\!\[(.*?)\]\((.*?)\)/g
+//         regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
+//         regexToSubstGroups = `$<txt1><img src='$<url>' alt="$<alt>"/>$<txt2>`;
+//         break;
+// }
+    
+// if (txt.match(regexToLinkMatch) !== null) {
+
+    
+//     txt = txt.replace(regexToHtml,regexToSubstGroups)
+// return makeHtmlLinks(txt)
+// }
+// else return txt 
+// }
+
+// const makeHtmlImg = (txt) => {                // LInk Invert conversion   
+// log('imgTXT', txt)
+
+// const regexToImgMatch = /\!\[(.*?)\]\((.*?)\)/g
+// if (txt.match(regexToImgMatch) !== null) {
+
+//     const regexToHtml=  /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g     
+//     txt = txt.replace(regexToHtml,`$<txt1><img src='$<url>' alt="$<alt>"/>$<txt2>`)
+ 
+// return makeHtmlImg(txt)
+// }
+// else return txt 
+// }
