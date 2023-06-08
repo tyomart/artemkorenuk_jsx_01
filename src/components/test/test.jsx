@@ -108,3 +108,103 @@ export default Test;
 // }
 // else return txt 
 // }
+
+// links
+// \[(?<link>.*?)\]\((?<url>.*?)\)
+
+
+// log ('inStr', inStr)
+
+// log('##zb#czd##fgh##'.match(/^##.*$/) ? 'test match' : 'test not')
+
+//  if (inStr.length > 0) {
+
+//     if (inStr.match(/^##.*$/) === true )  { log('matching ##', inStr.match(/^##/), )
+
+//     log('match')
+
+//     return inStr = inStr.replace(/^##/, convert('##')) 
+   
+
+        
+//     }
+
+// else if (inStr.match(/^#/) === true) {
+//   return inStr =  inStr.replace(/^#/, convert('#')) }//h1
+
+    
+
+//     inStr = inStr.replace(/$/, convertEndStr()); //
+//     return inStr
+//  }
+ 
+//  else return inStr
+
+
+
+
+
+//BS-DEL changing flag's dependent tags -- chnging only current tag
+//editing from any place inserts flag's dependant tags, calculate tag's flags for the editing place by last tags   
+
+// <b>adasdasd</b>dfsdf<b> 12323123</b> qqqwweeerr
+//tt<b>kkkkkooookkooo</b>
+
+// **adasdasd**dfsdf** 12323123** qqqwweeerr
+//tt**kkkkkooookkooo**
+
+//lists - level depends of spaces and tabs in the begin of a string
+
+
+
+/// GBG ----------------
+
+// const makeHtmlLinks = (txt) => {                // LInk Invert conversion   
+//     const regexToHtml=  /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g 
+//         const regexToMatch = /\[(.*?)\]\((.*?)\)/g //Link
+//         let regexToSubstGroups = '$<txt1><a href="$<url>">$<link></a>$<txt2>'
+
+//     if (txt.match(regexToMatch) !== null) {
+//             txt = txt.replace(regexToHtml, regexToSubstGroups)
+//         return makeHtmlLinks(txt)
+//     }
+//     else return txt 
+// }
+// const makeHtmlImg = (txt) => {                // LInk Invert conversion   
+
+//     const regexToHtml=  /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g 
+//         const regexToMatch = /\!\[(.*?)\]\((.*?)\)/g //Img
+//         let  regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`
+
+//     if (txt.match(regexToMatch) !== null) { 
+//             txt = txt.replace(regexToHtml,regexToSubstGroups)
+//         return makeHtmlImg(txt)
+//     }
+//     else return txt 
+// }
+
+// const bReplace = (txt) => {
+//     // log('b fired')
+//     if (txt.match(/\*\*/)) { //(txt.match(/.*\*\*/))
+        
+//         txt = txt.replace(/\*\*/, convert('**'))
+        
+//     return bReplace(txt)
+//     }
+//     else {
+//         //log('txt else', txt)
+//         return txt}
+
+// }
+
+// const iReplace = (txt) => {
+// if (txt.match(/\_/)) { //(txt.match(/.*\*\*/))
+        
+//     txt = txt.replace(/\_/, convert('_'))
+    
+// return iReplace(txt)
+// }
+// else {
+//     //log('txt else', txt)
+//     return txt}
+//   }
