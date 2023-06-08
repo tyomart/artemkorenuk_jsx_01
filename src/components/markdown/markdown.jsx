@@ -26,7 +26,7 @@ let flags  =
         ol: true,
         li: true,
         code: true,
-        codeBlock: true,
+        //codeBlock: true,
         cacheSpec:'',
         
         test:false, //test flag
@@ -85,7 +85,7 @@ const convert = (proTag ) => { //cash, char, j, txtAr
     if (proTag === '\`\`\`')                     // <h1> tag
             {
                 flags = {...flags, codeBlock:!(flags.codeBlock)}
-            return tagOpClos('code');
+            return tagOpClos('code'); // replace 'codeBlock' to 'code'
             }
     if (proTag === 'ul')                     // <h1> tag
             {
@@ -117,7 +117,12 @@ const convert = (proTag ) => { //cash, char, j, txtAr
                     flags = {...flags, tr:!(flags.tr)}
                 return tagOpClos('tr');
                 }
+        if (proTag === ' ')                     // <h1> tag
+        {
+            
+        return ' '
         }
+    }  
 
 const convertEndStr = () => {
 //   log('convertEnd')
@@ -136,28 +141,33 @@ const convertEndStr = () => {
     else return ''
 } 
 
-const uniReplace = (txt, type) => { // regex for exclude brackets [^\[\]|\(\)]+(?![^\(]*\))(?![^\[]*\])
-    let regex = ''; let toTag = ''; let toTagReplace = ''; 
-    let replaceRGX = new RegExp ('', 'g') // (?<=[^\[\]|\(\)])\*\*(?![^\[]*\])(?![^\(]*\)) // (?<=[^\[\]|\(\)])'+ toTagReplace + '(?![^\[]*\])(?![^\(]*\))
-    log('type', type, 'txt', txt)
+
+const uniReplace = (txt, type) => {
+    let regex = '', toTag = ''
+    
     switch (type) {
-        case 'b': regex = /\*\*/;  toTag = '**'; replaceRGX = /(?<=[^\[\]|\(\)])\*\*(?![^\[]*\])(?![^\(]*\))/; break
-        case 'i': regex = /\_/;  toTag = '_'; replaceRGX = /(?<=[^\[\]|\(\)])\_(?![^\[]*\])(?![^\(]*\))/; break
-        case '`': regex = /\`(?!\`)/;  toTag = '\`'; replaceRGX = /(?<=[^\[\]|\(\)])\`(?![^\[]*\])(?![^\(]*\))/; break
-       
+        case 'b': regex = /\*\*/;  toTag = '**';break
+        case 'i': regex = /\_/;  toTag = '_';break
+        case '\`': regex = /\`/;  toTag = '`';break;
+        default: regex = /\`/;  toTag = '';break;
     }
 
-    if (txt.match(regex)) { //(txt.match(/.*\*\*/))
-        
-        txt = txt.replace(replaceRGX, convert(toTag))
-        
-    return uniReplace(txt, type)
-    }
+    if (toTag.length === 0) 
+        return txt
+   
     else {
-        log('txt else', txt)
-        return txt}
+        if (txt.match(regex)) { //(txt.match(/.*\*\*/))
+        
+            txt = txt.replace(regex, convert(toTag))
+            
+        return uniReplace(txt, type)
+        }
+        else {
+            //log('txt else', txt)
+            return txt}
 
-        //regex to match all ** out of brackets (?<=[^\[\]|\(\)])\*\*(?![^\[]*\])(?![^\(]*\))/g
+    }
+    
 }
 
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
@@ -165,71 +175,137 @@ const uniReplace = (txt, type) => { // regex for exclude brackets [^\[\]|\(\)]+(
   // withBracketsExchange -> linkPlaceholdReplace, imgPlaceholdReplace, -> i-b change -> makeLinks (back) -> makeHtmlLinks -> return txt
 const process = (inStr) => {
 
-//regex to exclude round and square brackets
+    
 
-    inStr = uniReplace(inStr,'b') // replace to <b> // return str instead f inStr
-    inStr = uniReplace(inStr,'i') // replace to <i>
-    inStr = uniReplace(inStr,'\`') // replace to <i>
+    const withBracksReplace  = (preStr) => {
+        
+        const linkPlaceholdReplace = (txt,type) => {
 
+            let regex = ''; let stub = ''
+            switch (type){
+                case 'link': regex = /\[(.*?)\]\((.*?)\)/g ; stub = '©©©';break;
+                case 'img': regex = /\!\[(.*?)\]\((.*?)\)/g ; stub = '©~©';break;
+                // case 'code': regex = /^\`\`\`(.*?)\]\((.*?)\)/g ; stub = '©~coblock~©';break;
+            }   
+            let matching =  txt.match(regex)
+            let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
+            txt = txt.replace( regex, stub)
+        
+            return [txt, storageLink]
+        }
 
+        const linkInverseReplace  = (txt, store, type) =>  { // Invert Links Conversion
+
+            let regexStub = ''
+            switch(type){
+                case 'link':  regexStub = '©©©'; break
+                case 'img':  regexStub = '©~©'; break
+                // case 'code1':  regexStub = '©~coblock~©'; break
+                default:  regexStub = ''; break
+            }
+
+            let regexGlob = new RegExp(regexStub,'g'); let regexNoGlob = new RegExp(regexStub);
+            return store.length > 0 
+            ? store.reduce((acc,elem) => {  
+
+                let matchCPR = txt.match(regexGlob) 
+
+                if (matchCPR!==null) 
+                    { txt = txt.replace(regexNoGlob, elem);
+                    return acc = txt}
+                else return acc = txt
+            }, '' ) 
+        :txt;} // end of ternary 
+
+        const makeHtml = (txt,type) => {                // LInk Invert conversion   
+       
+        let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
+        switch(type) {
+            case 'link': 
+                regexToMatch =  /\[(.*?)\]\((.*?)\)/g; //log('link fired', txt.match(regexToMatch)); 
+                regexToHtml =   /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g  ;
+                regexToSubstGroups = `$<txt1><a href="$<url>">$<link></a>$<txt2>`;
+                break;
+            case 'img': 
+                regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
+                regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
+                regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
+                break;
+            // case 'code': 
+            //     regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
+            //     regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
+            //     regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
+            // break;
+        }
+
+        if (txt.match(regexToMatch) !== null) { 
+            txt = txt.replace(regexToHtml,regexToSubstGroups)
+        return makeHtml(txt, type)
+    }
+    else return txt 
+        }
+   
+
+       let [pre1str,storeImgs] =   linkPlaceholdReplace(preStr, 'img') 
+       let [str,storeLinks] =   linkPlaceholdReplace(pre1str, 'link')  
+
+        str = uniReplace(str,'b')
+        str = uniReplace(str,'i')
+        str = uniReplace(str,'`')
+
+        // //get back transformed brackets
+        str = linkInverseReplace (str,storeImgs, 'img' )
+        str = linkInverseReplace (str,storeLinks, 'link')
       
+      
+         str = makeHtml(str, 'img')
+         str = makeHtml(str, 'link')
+  
+        return str
+        } // withBracketsReplace end
 
-//replacng headers
+       
+   inStr = withBracksReplace(inStr)  // actions and replacing with brackets
+
    inStr = inStr.match(/^####.*$/) ? inStr.replace(/^####/, convert('####')) : inStr
    inStr = inStr.match(/^###.*$/) ? inStr.replace(/^###/, convert('###')) : inStr
    inStr = inStr.match(/^##.*$/) ? inStr.replace(/^##/, convert('##')) : inStr
    inStr = inStr.match(/^#.*$/) ? inStr.replace(/^#/, convert('#')) : inStr
+ 
 
-// const headersReplace  = (txt, toTag) => {
-//     regexMatch = new RegExp(`^`+ toTag +`.*$`); regexReplace = new RegExp('^' + toTag)  
-//     txt = inStr.match(regexMatch) ? txt.replace(regexReplace, convert(toTag)) : txt
-//     return txt
-//    }
-//  headersReplace(inStr)
-
-//    withBracksReplace(inStr)
 return inStr // return of process()
 }
 
-const breakLiner = (inVal) => {
-
-// code-block hidder-tagger have to be here
-
-   
-    return  breakLines(inVal).map(str => process(str))
+const bufferPreTxt = (inStr) => { 
+//place for Code Block replace 
+    return  breakLines(inStr).map(str => process(str))
 }
 
-// WORKING STREAMLINE
-
-// handleIn (setPreIn) -> LayoutFX(setEdit, setReady) -> 
-// setReady -> breakLiner -> process( processing strings)
-
-const handleTest = () => {  // TO DO : fix </tag> issue, fix readyTXT output on screen
-
-    const aTest = 'z_#c_**\`<div></div>\` [i_g**en](http://g_p**e.ru/8_.j)zd##![google.com](http://goo_**x.com)fg_**h##_id![li_nk](http://ya_**x.ru) 12v_**'
-    // let tag = '\\'+'*'+'\\'+'*'; let regexTest = new RegExp('(?<=[^\[\]|\(\)])'+tag+ '(?![^\[]*\])(?![^\(]*\))','g')
-    // let replaceRGX = /(?<=[^\[\]|\(\)])\*\*(?![^\[]*\])(?![^\(]*\))/
-
-    // let testMatch =  aTest.match(replaceRGX)
-    // log('testMatch', testMatch)
-
-     //process(aTest)
-     return log('process ->', '\n',  process(aTest))//  process(aTest)
- }
- 
-
 const handleIn = (e) => {
+   
     const inputString = e.target.value
     setPreIn(inputString)
+
     return 
+}
+
+const handleTest = () => {
+
+   const aTest = `z_#c_**[i_g**en](http://g_p**e.ru/8_.j)zd##![google.com](http://goo_**x.com)fg_**h##_id![li_nk](http://ya_**x.ru) 12v_**`
+
+  
+    process(aTest)
+    return log('process ->', '\n', process(aTest))// process(aTest)
 }
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
     if (preIn.length >0) { // to not send empties in state
 
+  
         setEdit(preIn)
-        setReadyTXT(breakLiner(preIn))
+
+        setReadyTXT(bufferPreTxt(preIn))
     }
     else {log('empties')}
 },[preIn])
@@ -240,7 +316,7 @@ useLayoutEffect(()=>{                 //parser HTML, uses 'output' id in <div> a
     const html = $outP.html()
     const newHtml = html + readyTXT
     $outP.html(newHtml)
-   return log(html)
+   return 
 },[readyTXT])
 
 // Components for out ----------------------
@@ -296,6 +372,41 @@ const Preview = (props) => {  //const { eDisp }  = props
 }
 
 export default Markdown;
+
+
+// links
+// \[(?<link>.*?)\]\((?<url>.*?)\)
+
+
+// log ('inStr', inStr)
+
+// log('##zb#czd##fgh##'.match(/^##.*$/) ? 'test match' : 'test not')
+
+//  if (inStr.length > 0) {
+
+//     if (inStr.match(/^##.*$/) === true )  { log('matching ##', inStr.match(/^##/), )
+
+//     log('match')
+
+//     return inStr = inStr.replace(/^##/, convert('##')) 
+   
+
+        
+//     }
+
+// else if (inStr.match(/^#/) === true) {
+//   return inStr =  inStr.replace(/^#/, convert('#')) }//h1
+
+    
+
+//     inStr = inStr.replace(/$/, convertEndStr()); //
+//     return inStr
+//  }
+ 
+//  else return inStr
+
+
+
 
 
 //BS-DEL changing flag's dependent tags -- chnging only current tag
@@ -362,90 +473,3 @@ export default Markdown;
 //     //log('txt else', txt)
 //     return txt}
 //   }
-
-// const bypassBracketsReplace  = (preStr) => { // bypass brackets for anchors and imgs -- foo body
-        
-//     const linkPlaceholdReplace = (txt,type) => {// bypass brackets 1
-
-//         let regex = ''; let stub = ''
-//         switch (type){
-//             case 'link': regex = /\[(.*?)\]\((.*?)\)/g ; stub = '©©©';break;
-//             case 'img': regex = /\!\[(.*?)\]\((.*?)\)/g ; stub = '©~©';break;
-//             // case 'code': regex = /^\`\`\`(.*?)\]\((.*?)\)/g ; stub = '©~coblock~©';break;
-//         }   
-//         let matching =  txt.match(regex)
-//         let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
-//         txt = txt.replace( regex, stub)
-    
-//         return [txt, storageLink]
-//     }
-
-//     const linkInverseReplace  = (txt, store, type) =>  { // bypass brackets 2 // Invert Links Conversion
-
-//         let regexStub = ''
-//         switch(type){
-//             case 'link':  regexStub = '©©©'; break
-//             case 'img':  regexStub = '©~©'; break
-//             // case 'code1':  regexStub = '©~coblock~©'; break
-//             default:  regexStub = ''; break
-//         }
-
-//         let regexGlob = new RegExp(regexStub,'g'); let regexNoGlob = new RegExp(regexStub);
-//         return store.length > 0 
-//         ? store.reduce((acc,elem) => {  
-
-//             let matchCPR = txt.match(regexGlob) 
-
-//             if (matchCPR!==null) 
-//                 { txt = txt.replace(regexNoGlob, elem);
-//                 return acc = txt}
-//             else return acc = txt
-//         }, '' ) 
-//     :txt;} // end of ternary 
-
-//     const makeHtml = (txt,type) => {                // bypass brackets 3 // LInk Invert conversion   
-   
-//     let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
-//     switch(type) {
-//         case 'link': 
-//             regexToMatch =  /\[(.*?)\]\((.*?)\)/g; //log('link fired', txt.match(regexToMatch)); 
-//             regexToHtml =   /(?<txt1>[^[]+)\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g  ;
-//             regexToSubstGroups = `$<txt1><a href="$<url>">$<link></a>$<txt2>`;
-//             break;
-//         case 'img': 
-//             regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
-//             regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
-//             regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
-//             break;
-//         // case 'code': 
-//         //     regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
-//         //     regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
-//         //     regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
-//         // break;
-//     }
-
-//     if (txt.match(regexToMatch) !== null) { 
-//         txt = txt.replace(regexToHtml,regexToSubstGroups)
-//     return makeHtml(txt, type)
-// }
-// else return txt 
-//     }
-
-//    let [pre1str,storeImgs] =   linkPlaceholdReplace(preStr, 'img') 
-//    let [str,storeLinks] =   linkPlaceholdReplace(pre1str, 'link')  
-
-//     str = uniReplace(str,'b') // replace to <b>
-//     str = uniReplace(str,'i') // replace to <i>
-//     str = uniReplace(str,'\`') // replace to <i>
-
-//     // //get back transformed brackets
-//     str = linkInverseReplace (str,storeImgs, 'img' )
-//     str = linkInverseReplace (str,storeLinks, 'link')
-  
-  
-//      str = makeHtml(str, 'img')
-//      str = makeHtml(str, 'link')
-
-//     return str
-//     } // withBracketsReplace end
-  // inStr = bypassBracketsReplace (inStr)  // use when have to bypass content in brackets like links and imgs
