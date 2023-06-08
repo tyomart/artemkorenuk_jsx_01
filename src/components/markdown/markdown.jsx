@@ -140,7 +140,7 @@ const convertEndStr = (txt) => {
     else  if (flags.h4===false) {
         return txt.replace(/$/,  '</h4><br/>\n')
     }
-    else return txt.replace(/$/,  '<br/>')
+    else return txt.replace(/^/,  '<div>').replace(/$/,'</div>')
 } 
 
 const headerReplace = (txt) => {
