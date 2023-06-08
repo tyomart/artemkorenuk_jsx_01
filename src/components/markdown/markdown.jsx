@@ -128,19 +128,19 @@ const convertEndStr = (txt) => {
 //   log('convertEnd')
     if (flags.h1===false) {
         flags = {...flags, h1:!(flags.h1)}
-        return txt.replace(/$/, '</h1><hr/><br/>')
+        return txt.replace(/$/, '</h1><hr/><br/>\n')
     } 
     else  if (flags.h2===false) {
         flags = {...flags, h2:!(flags.h2)} 
         return txt.replace(/$/, '</h2><hr/><br/>\n')
     }
     else  if (flags.h3===false) {
-        return txt.replace(/$/, '</h3><br/>')
+        return txt.replace(/$/, '</h3><br/>\n')
     }
     else  if (flags.h4===false) {
-        return txt.replace(/$/,  '</h4><br/>')
+        return txt.replace(/$/,  '</h4><br/>\n')
     }
-    else return txt.replace(/$/,  '')
+    else return txt.replace(/$/,  '<br/>')
 } 
 
 const headerReplace = (txt) => {
@@ -184,7 +184,7 @@ const uniReplace = (txt, type) => {
   // withBracketsExchange -> linkPlaceholdReplace, imgPlaceholdReplace, -> i-b change -> makeLinks (back) -> makeHtmlLinks -> return txt
 const process = (inStr) => {
 
-    const withBracksReplace  = (preStr) => {
+    const withBracketsReplace  = (preStr) => {
         
         const linkPlaceholdReplace = (txt,type) => {
 
@@ -255,9 +255,12 @@ const process = (inStr) => {
        let [pre1str,storeImgs] =   linkPlaceholdReplace(preStr, 'img') 
        let [str,storeLinks] =   linkPlaceholdReplace(pre1str, 'link')  
 
-        str = uniReplace(str,'b')   // uniReplace
-        str = uniReplace(str,'i')   // uniReplace
-        str = uniReplace(str,'`')   // uniReplace
+// -------- // uniReplace block -----------------
+        str = uniReplace(str,'b')   
+        str = uniReplace(str,'i')   
+        str = uniReplace(str,'`')   
+// ----------// // uniReplace block -------------
+
 
         // //get back transformed brackets
         str = linkInverseReplace (str,storeImgs, 'img' )
@@ -271,7 +274,7 @@ const process = (inStr) => {
         } // withBracketsReplace end
 
        
-   inStr = withBracksReplace(inStr)  // actions and replacing with brackets
+   inStr = withBracketsReplace(inStr)  // actions and replacing with brackets
 
 // header replace
   inStr = headerReplace(inStr)
@@ -282,7 +285,9 @@ return inStr // return of process()
 
 const bufferPreTxt = (inStr) => { 
 //place for Code Block replace 
-    return  breakLines(inStr).map(str => process(str))
+    inStr = breakLines(inStr).map(str => process(str))
+    log('breakLines', inStr)
+    return  inStr
 }
 
 const handleIn = (e) => {
