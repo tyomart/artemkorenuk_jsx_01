@@ -6,13 +6,14 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-
-    const [preIn, setPreIn] = useState('') // inputing state
+   const initialPreIn  = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+    const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
 
 let flags  = 
     {   
+        inputOn: false,
         h1: true,
         h2: true,
         h3: true,
@@ -178,6 +179,91 @@ const uniReplace = (txt, type) => {
     }
     
 }
+const aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+const linkPlaceholdReplace = (txt,type) => {
+
+    let regex = ''; let stub = ''
+    switch (type){
+        case 'link': regex = /\[(.*?)\]\((.*?)\)/g ; stub = '©©©';break;
+        case 'img': regex = /\!\[(.*?)\]\((.*?)\)/g ; stub = '©~©';break;
+        case 'code': regex = /(<code>[\s\S]*?<\/code>)/gm ; stub = '©~<CODE>~©';break;
+       
+    }   
+    let matching =  txt.match(regex)
+    let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
+    txt = txt.replace( regex, stub)
+
+    return [txt, storageLink]
+}
+
+const linkInverseReplace  = (txt, store, type) =>  { // Invert Links Conversion
+    // log('inverse replace', type)
+    let regexStub = ''
+    switch(type){
+        case 'link':  regexStub = '©©©'; break
+        case 'img':  regexStub = '©~©'; break
+        case 'code':  regexStub = '©~<CODE>~©'; break
+    
+        default:  regexStub = ''; break
+    }
+
+    let regexGlob = new RegExp(regexStub,'g'); let regexNoGlob = new RegExp(regexStub);
+    return store.length > 0 
+    ?   store.reduce((acc,elem) => {  
+
+            let matchCPR = txt.match(regexGlob) 
+
+                if (matchCPR!==null) 
+                    { txt = txt.replace(regexNoGlob, elem);
+                            // log('inversed', txt )
+                    return acc = txt}
+                else return acc = txt
+        }, '' ) 
+    :txt;} // end of ternary 
+
+const linkInverseReplace0  = (txt, store, type) =>  { // Invert Links Conversion
+    log('txt PRE ---- match');
+        return store.length > 0 
+        ?   store.reduce((acc,elem) => {  
+                log('txt ---- match', typeof txt, txt); log(  txt.match(/©~<CODE>~©/g));
+                let matchCPR = txt.match(/©~<CODE>~©/g) 
+    
+                    if (matchCPR!==null) 
+                        { txt = txt.replace(/©~<CODE>~©/, elem);
+                        return acc = txt}
+                    else return acc = txt
+            }, '' ) 
+        :txt;} // end of ternary 
+
+const makeHtml = (txt,type) => {                // LInk Invert conversion   // 
+
+    let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
+    switch(type) {
+        case 'link': 
+            regexToMatch =  /\[(.*?)\]\((.*?)\)/; //log('link fired', txt.match(regexToMatch)); 
+            regexToHtml =   /\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)/  ;
+            regexToSubstGroups = `<a href="$<url>">$<link></a>`;
+            break;
+        case 'img': 
+            regexToMatch = /\!\[(.*?)\]\((.*?)\)/ 
+            regexToHtml=   /\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)/   
+            regexToSubstGroups = `<img src="$<url>" alt="$<alt>"/>`;
+            break;
+        case 'code': 
+            regexToMatch = /\n```[\s\S]*?```\n/gm
+            regexToHtml=   /\n```([\s\S]*?)```\n/gm 
+            regexToSubstGroups = `\n<code>$1</code>\n`;
+            break;
+ 
+    }
+// log('match', txt.match(regexToMatch))
+    if (txt.match(regexToMatch) !== null) { 
+        txt = txt.replace(regexToHtml,regexToSubstGroups)
+    return makeHtml(txt, type)
+}
+else return txt 
+    }
+
 
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
 
@@ -186,71 +272,6 @@ const process = (inStr) => {
 
     const withBracketsReplace  = (preStr) => {
         
-        const linkPlaceholdReplace = (txt,type) => {
-
-            let regex = ''; let stub = ''
-            switch (type){
-                case 'link': regex = /\[(.*?)\]\((.*?)\)/g ; stub = '©©©';break;
-                case 'img': regex = /\!\[(.*?)\]\((.*?)\)/g ; stub = '©~©';break;
-                // case 'code': regex = /^\`\`\`(.*?)\]\((.*?)\)/g ; stub = '©~coblock~©';break;
-            }   
-            let matching =  txt.match(regex)
-            let storageLink = matching !== null ? matching.reduce((acc,elem)=>{return [...acc, elem]},[]) : []  // collect links
-            txt = txt.replace( regex, stub)
-        
-            return [txt, storageLink]
-        }
-
-        const linkInverseReplace  = (txt, store, type) =>  { // Invert Links Conversion
-            log('inverse replace', type)
-            let regexStub = ''
-            switch(type){
-                case 'link':  regexStub = '©©©'; break
-                case 'img':  regexStub = '©~©'; break
-                // case 'code1':  regexStub = '©~coblock~©'; break
-                default:  regexStub = ''; break
-            }
-
-            let regexGlob = new RegExp(regexStub,'g'); let regexNoGlob = new RegExp(regexStub);
-            return store.length > 0 
-            ? store.reduce((acc,elem) => {  
-
-                let matchCPR = txt.match(regexGlob) 
-
-                if (matchCPR!==null) 
-                    { txt = txt.replace(regexNoGlob, elem);
-                    return acc = txt}
-                else return acc = txt
-            }, '' ) 
-        :txt;} // end of ternary 
-
-        const makeHtml = (txt,type) => {                // LInk Invert conversion   // need to be rewritten cause of groups in replace out th error
-       
-            let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
-            switch(type) {
-                case 'link': 
-                    regexToMatch =  /\[(.*?)\]\((.*?)\)/; //log('link fired', txt.match(regexToMatch)); 
-                    regexToHtml =   /\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)/  ;
-                    regexToSubstGroups = `<a href="$<url>">$<link></a>`;
-                    break;
-                case 'img': 
-                    regexToMatch = /\!\[(.*?)\]\((.*?)\)/ 
-                    regexToHtml=   /\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)/   
-                    regexToSubstGroups = `<img src="$<url>" alt="$<alt>"/>`;
-                    break;
-                // case 'code': 
-                //     regexToMatch = /\!\[(.*?)\]\((.*?)\)/g 
-                //     regexToHtml=   /(?<txt1>[^[]+)\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)(?<txt2>[^[]+)/g   
-                //     regexToSubstGroups = `$<txt1><img src="$<url>" alt="$<alt>"/>$<txt2>`;
-                // break;
-            }
-        
-            if (txt.match(regexToMatch) !== null) { 
-                txt = txt.replace(regexToHtml,regexToSubstGroups)
-            return makeHtml(txt, type)
-        }
-        else return txt 
-            }
 
        let [pre1str,storeImgs] =   linkPlaceholdReplace(preStr, 'img') 
        let [str,storeLinks] =   linkPlaceholdReplace(pre1str, 'link')  
@@ -284,34 +305,49 @@ return inStr // return of process()
 }
 
 const bufferPreTxt = (inStr) => { 
-//place for Code Block replace 
-    inStr = breakLines(inStr).map(str => process(str))
-    log('breakLines', inStr)
+
+    let b_InStr = makeHtml(preIn, 'code')
+    let [c_InStr, store] = linkPlaceholdReplace(b_InStr, 'code')
+    log('after placholding', c_InStr)
+    //break on lines
+    c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
+    
+    // log('cTest', cTest)
+    inStr =  linkInverseReplace0(c_InStr, store, 'code')
+
     return  inStr
 }
 
 const handleIn = (e) => {
-   
+
     const inputString = e.target.value
     setPreIn(inputString)
-
     return 
 }
-
+// make stubs OOO -> process text -> inverse to HTML
 const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
-    const aTest = `#z_#c_**[i_g**en](http://g_p**e.ru/8_.j) zd##![google.com](http://goo_**x.com)fg_<**h##_id![li_nk](http://ya_**x.ru) 12v_**`
-    // process(aTest)
-    return log(' ->', '\n',)// process(aTest)
+   
+    // let aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+    // // process(aTest)
+
+    // let bTest = makeHtml(aTest, 'code')
+    // let [cTest, store] = linkPlaceholdReplace(bTest, 'code')
+    
+   
+    // aTest =  linkInverseReplace(cTest, store, 'code')
+  
+    // return log( '\n',aTest )
 }
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
     if (preIn.length >0) { // to not send empties in state
 
-  
-        setEdit(preIn)
-
-        setReadyTXT(bufferPreTxt(preIn).join('\n'))
+        
+        setEdit(preIn) ; //log('preIn in Fx', preIn)
+       
+        setTimeout(5000)
+        setReadyTXT(bufferPreTxt(preIn)) // TO DO make code blocks
     }
     else {log('empties')}
 },[preIn])
