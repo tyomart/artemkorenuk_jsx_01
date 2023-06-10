@@ -6,7 +6,7 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-   const initialPreIn  = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+   const initialPreIn  = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`d##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
     const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
@@ -37,7 +37,7 @@ const breakLines = (txt) => {
 
     return txt.split('\n')
 }
-
+// TO DO makes negative groups for 2 backticks and 3 backticks
 const convert = (proTag ) => { //cash, char, j, txtAr
 
     const tagOpClos = (tag) => { // open/closed tag substitution
@@ -141,7 +141,7 @@ const convertEndStr = (txt) => {
     else  if (flags.h4===false) {
         return txt.replace(/$/,  '</h4><br/>\n')
     }
-    else return txt.replace(/^/,  '<div>').replace(/$/,'</div>')
+    else return txt.replace(/^/,  '<p>').replace(/$/,'</p>')
 } 
 
 const headerReplace = (txt) => {
@@ -158,7 +158,7 @@ const uniReplace = (txt, type) => {
     switch (type) {
         case 'b': regex = /\*\*/;  toTag = '**';break
         case 'i': regex = /\_/;  toTag = '_';break
-        case '\`': regex = /\`/;  toTag = '`';break;
+        case '\`': regex = /(?<![`\\])`(?!`)/;  toTag = '`';break;
         default: regex = /\`/;  toTag = '';break;
     }
 
@@ -179,7 +179,9 @@ const uniReplace = (txt, type) => {
     }
     
 }
-const aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+const aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! 
+                [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**
+                h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
 const linkPlaceholdReplace = (txt,type) => {
 
     let regex = ''; let stub = ''
@@ -222,10 +224,10 @@ const linkInverseReplace  = (txt, store, type) =>  { // Invert Links Conversion
     :txt;} // end of ternary 
 
 const linkInverseReplace0  = (txt, store, type) =>  { // Invert Links Conversion
-    log('txt PRE ---- match');
+   
         return store.length > 0 
         ?   store.reduce((acc,elem) => {  
-                log('txt ---- match', typeof txt, txt); log(  txt.match(/©~<CODE>~©/g));
+              
                 let matchCPR = txt.match(/©~<CODE>~©/g) 
     
                     if (matchCPR!==null) 
@@ -305,17 +307,15 @@ return inStr // return of process()
 }
 
 const bufferPreTxt = (inStr) => { 
+    // b-InStr - ``` to <code> // c_InStr hides <code> // other replacing // d_InStr - unhide back <code)
 
     let b_InStr = makeHtml(preIn, 'code')
     let [c_InStr, store] = linkPlaceholdReplace(b_InStr, 'code')
-    log('after placholding', c_InStr)
-    //break on lines
-    c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
-    
-    // log('cTest', cTest)
-    inStr =  linkInverseReplace0(c_InStr, store, 'code')
 
-    return  inStr
+    c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
+    let d_InStr =  linkInverseReplace0(c_InStr, store, 'code')
+
+    return  d_InStr
 }
 
 const handleIn = (e) => {
@@ -327,14 +327,8 @@ const handleIn = (e) => {
 // make stubs OOO -> process text -> inverse to HTML
 const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
    
-    // let aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
-    // // process(aTest)
-
-    // let bTest = makeHtml(aTest, 'code')
-    // let [cTest, store] = linkPlaceholdReplace(bTest, 'code')
-    
+    // let aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n [google.com](http://goo_**x.com)fg_n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
    
-    // aTest =  linkInverseReplace(cTest, store, 'code')
   
     // return log( '\n',aTest )
 }
@@ -346,7 +340,7 @@ useLayoutEffect(()=>{                 //triggering Text Processor and sync edito
         
         setEdit(preIn) ; //log('preIn in Fx', preIn)
        
-        setTimeout(5000)
+        // setTimeout(5000)
         setReadyTXT(bufferPreTxt(preIn)) // TO DO make code blocks
     }
     else {log('empties')}
