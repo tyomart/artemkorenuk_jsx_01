@@ -156,13 +156,15 @@ const headerReplace = (txt) => {
     return txt
    }
 
-const uniReplace = (txt, type) => {
+const uniReplace = (txt, type) => { // use marker for replace, and use actually text situation as '>' -> />\s/ for blockquote
     let regex = '', toTag = ''
     
     switch (type) {
         case 'b': regex = /\*\*/;  toTag = '**';break
         case 'i': regex = /\_/;  toTag = '_';break
         case '\`': regex = /(?<![`\\])`(?!`)/;  toTag = '`';break;
+        case 'ul': regex = /\-/;  toTag = 'ul';break
+        case '>': regex = /\>\s/;  toTag = 'blockquote';break
         default: regex = /\`/;  toTag = '';break;
     }
 
@@ -183,9 +185,7 @@ const uniReplace = (txt, type) => {
     }
     
 }
-const aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! 
-                [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**
-                h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+
 const linkPlaceholdReplace = (txt,type) => {
 
     let regex = ''; let stub = ''
@@ -260,9 +260,14 @@ const makeHtml = (txt,type) => {                // LInk Invert conversion   //
             regexToHtml=   /\n```\n(?<codeRGX>[\s\S]*?)\n```\n/gm 
             regexToSubstGroups = `\n<code>$<codeRGX></code>\n`;
             break;
+        case 'quote': 
+            regexToMatch = />\s[\s\S]*?\n/gm
+            regexToHtml=   />\s(?<quote>[\s\S]*?)\n/m 
+            regexToSubstGroups = `\n<blockquote>| $<quote></blockquote><br/>\n`;
+            break;
  
     }
-
+    // type = 'quote' ? log('replace quoe', txt.replace(regexToHtml, `\n<blockquote>$<quote></blockquote><br/>\n`)) : log('')
     let matching = txt.match(regexToMatch) ;
     if (matching !== null) { 
         txt = txt.replace(regexToHtml, type === 'code'? `\n<code>` + convertCodeBlock(matching[0]) + `</code>\n` : regexToSubstGroups  
@@ -277,7 +282,8 @@ else return txt
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
 
   // withBracketsExchange -> linkPlaceholdReplace, imgPlaceholdReplace, -> i-b change -> makeLinks (back) -> makeHtmlLinks -> return txt
-const process = (inStr) => {
+
+const process = (inStr) => { // main processor is uniReplace // linkPlace,Inverse,makeHtml to bypass with code blocks
 
     const withBracketsReplace  = (preStr) => {
         
@@ -285,10 +291,11 @@ const process = (inStr) => {
        let [pre1str,storeImgs] =   linkPlaceholdReplace(preStr, 'img') 
        let [str,storeLinks] =   linkPlaceholdReplace(pre1str, 'link')  
 
-// -------- // uniReplace block -----------------
+// -------- // uniReplace block ----------------- // transmit just marker of further replace
         str = uniReplace(str,'b')   
         str = uniReplace(str,'i')   
         str = uniReplace(str,'`')   
+        str = uniReplace(str,'>')   
 // ----------// // uniReplace block -------------
 
 
@@ -321,8 +328,8 @@ const bufferPreTxt = (inStr) => {
 
     c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
     let d_InStr =  linkInverseReplace0(c_InStr, store, 'code')
-
-    return  d_InStr
+    let e_InStr = makeHtml(inStr, 'quote')
+    return  e_InStr
 }
 
 const handleIn = (e) => {

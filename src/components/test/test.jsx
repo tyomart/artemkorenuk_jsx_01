@@ -6,7 +6,7 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-   const initialPreIn  = `z_c_\n\`\`\`\n[i_g**en]( z\n\`\`\`d! [gg_\n\`\`\`\n<*hi\n\`\`\`\nd![li 12v_*`
+   const initialPreIn  = `z_c_\n\`\`\`\n[i_g**en]( z\n\`\`\`d! [gg_\n\`\`\`\n<*hi\n\`\`\`\nd![li 12v_*\n> Quota\n other text strings`
     const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
@@ -119,9 +119,10 @@ const uniReplace = (txt, type) => {
     }
     
 }
-const aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`\nd##! 
-                [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**
-                h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+const aTest = `#z_#c_\
+                \n
+                > quotesfsdf afsdf\n
+                aaaaa`
 
 const linkPlaceholdReplace = (txt,type) => {
 
@@ -178,15 +179,18 @@ const makeHtml = (txt,type) => {                // LInk Invert conversion   //
 
     let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; let codeBlock = 'a';
     switch(type) {
-       case 'code': 
-            regexToMatch = /\n```\n[\s\S]*?\n```\n/gm
-            regexToHtml=   /\n```\n(?<codeRGX>[\s\S]*?)\n```\n/gm 
-            regexToSubstGroups = `\n<code>$<codeRGX></code>\n`;
+    
+        case 'quote': 
+            regexToMatch = />\s[\s\S]*?\n/gm
+            regexToHtml=   />\s(?<quote>[\s\S]*?)\n/m 
+            regexToSubstGroups = `\n<blockquote>| $<quote></blockquote><br/>\n`;
+        break;
 
-            break;  }
-let matching = txt.match(regexToMatch) ;// log('matching', matching !== null ? convertCodeBlock(matching[0]) : 'NULL')
+             }
+let matching = txt.match(regexToMatch) ;
+ log('matching', matching !== null ? matching[0] : 'NULL')
     if (matching !== null) { 
-        txt = txt.replace(regexToHtml, type === 'code'? `\n<code>` + convertCodeBlock(matching[0]) + `</code>\n` : regexToSubstGroups  
+        txt = txt.replace(regexToHtml, regexToSubstGroups  
         )
 
     return makeHtml(txt, type)
@@ -223,13 +227,13 @@ return inStr // return of process()
 const bufferPreTxt = (inStr) => { 
     // b-InStr - ``` to <code> // c_InStr hides <code> // other replacing // d_InStr - unhide back <code)
 
-    let b_InStr = makeHtml(preIn, 'code')
-    let [c_InStr, store] = linkPlaceholdReplace(b_InStr, 'code')
+    // let b_InStr = makeHtml(preIn, 'code')
+    // let [c_InStr, store] = linkPlaceholdReplace(b_InStr, 'code')
 
-    c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
-    let d_InStr =  linkInverseReplace0(c_InStr, store, 'code')
-
-    return  d_InStr
+    // c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
+    // let d_InStr =  linkInverseReplace0(c_InStr, store, 'code')
+    let e_InStr = makeHtml(inStr, 'quote')
+    return  e_InStr
 }
 
 const handleIn = (e) => {
@@ -241,11 +245,7 @@ const handleIn = (e) => {
 // make stubs OOO -> process text -> inverse to HTML
 const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
    
-    // let aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n [google.com](http://goo_**x.com)
-    //                  fg_n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
-   
-  
-    // return log( '\n',aTest )
+    return log('quote', makeHtml(preIn, 'quote'))
 }
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
