@@ -83,11 +83,11 @@ const convert = (proTag ) => { //cash, char, j, txtAr
                 flags = {...flags, code:!(flags.code)}
             return tagOpClos('code');
             }
-    if (proTag === '\`\`\`')                     // <h1> tag
-            {
-                flags = {...flags, codeBlock:!(flags.codeBlock)}
-            return tagOpClos('code'); // replace 'codeBlock' to 'code'
-            }
+    // if (proTag === '\`\`\`')                     // <h1> tag
+    //         {
+    //             flags = {...flags, codeBlock:!(flags.codeBlock)}
+    //         return tagOpClos('code'); // replace 'codeBlock' to 'code'
+    //         }
     if (proTag === 'ul')                     // <h1> tag
             {
                 flags = {...flags, ul:!(flags.ul)}
@@ -143,7 +143,11 @@ const convertEndStr = (txt) => {
     }
     else return txt.replace(/^/,  '<p>').replace(/$/,'</p>')
 } 
-
+const convertCodeBlock = (txt) => {
+    
+        txt = txt.replace(/\n/gm, '<br/>')
+        return txt
+    }
 const headerReplace = (txt) => {
     txt = txt.match(/^####.*$/) ? txt.replace(/^####/, convert('####')) : txt
     txt = txt.match(/^###.*$/) ? txt.replace(/^###/, convert('###')) : txt
@@ -242,7 +246,7 @@ const makeHtml = (txt,type) => {                // LInk Invert conversion   //
     let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
     switch(type) {
         case 'link': 
-            regexToMatch =  /\[(.*?)\]\((.*?)\)/; //log('link fired', txt.match(regexToMatch)); 
+            regexToMatch =  /\[(.*?)\]\((.*?)\)/; 
             regexToHtml =   /\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)/  ;
             regexToSubstGroups = `<a href="$<url>">$<link></a>`;
             break;
@@ -252,20 +256,23 @@ const makeHtml = (txt,type) => {                // LInk Invert conversion   //
             regexToSubstGroups = `<img src="$<url>" alt="$<alt>"/>`;
             break;
         case 'code': 
-            regexToMatch = /\n```[\s\S]*?```\n/gm
-            regexToHtml=   /\n```([\s\S]*?)```\n/gm 
-            regexToSubstGroups = `\n<code>$1</code>\n`;
+            regexToMatch = /\n```\n[\s\S]*?\n```\n/gm
+            regexToHtml=   /\n```\n(?<codeRGX>[\s\S]*?)\n```\n/gm 
+            regexToSubstGroups = `\n<code>$<codeRGX></code>\n`;
             break;
  
     }
-// log('match', txt.match(regexToMatch))
-    if (txt.match(regexToMatch) !== null) { 
-        txt = txt.replace(regexToHtml,regexToSubstGroups)
+
+    let matching = txt.match(regexToMatch) ;
+    if (matching !== null) { 
+        txt = txt.replace(regexToHtml, type === 'code'? `\n<code>` + convertCodeBlock(matching[0]) + `</code>\n` : regexToSubstGroups  
+        )
+
     return makeHtml(txt, type)
 }
 else return txt 
     }
-
+ 
 
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
 
@@ -327,7 +334,8 @@ const handleIn = (e) => {
 // make stubs OOO -> process text -> inverse to HTML
 const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
    
-    // let aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n [google.com](http://goo_**x.com)fg_n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+    // let aTest = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n [google.com](http://goo_**x.com)
+    //                  fg_n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
    
   
     // return log( '\n',aTest )
