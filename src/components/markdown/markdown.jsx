@@ -6,7 +6,7 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-   const initialPreIn  = `#z_#c_\n\`\`\`\n**[i_g**en](http://g_p**e.ru/8_.j) z\n\`\`\`d##! [google.com](http://goo_**x.com)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![li_nk](http://ya_**x.ru) 12v_**`
+   const initialPreIn  = `#z_#c_\n\n> Quote abcd \n---\n\`\`\`\n**[i_g](hru.j) z\n\`\`\`dada\n sd##! [gm](htcom)fg_\n\`\`\`\n<**h##_i\n\`\`\`\nd![lik](h**x.ru) 12v_**`
     const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
@@ -141,7 +141,7 @@ const convertEndStr = (txt) => {
     else  if (flags.h4===false) {
         return txt.replace(/$/,  '</h4><br/>\n')
     }
-    else return txt.replace(/^/,  '<p>').replace(/$/,'</p>')
+    else return txt.replace(/^/,  '').replace(/$/,'<br/>')
 } 
 const convertCodeBlock = (txt) => {
     
@@ -173,17 +173,13 @@ const uniReplace = (txt, type) => { // use marker for replace, and use actually 
    
     else {
         if (txt.match(regex)) { //(txt.match(/.*\*\*/))
-        
-            txt = txt.replace(regex, convert(toTag))
-            
+            txt = txt.replace(regex, convert(toTag))  
         return uniReplace(txt, type)
         }
         else {
             //log('txt else', txt)
             return txt}
-
-    }
-    
+    }   
 }
 
 const linkPlaceholdReplace = (txt,type) => {
@@ -241,6 +237,8 @@ const linkInverseReplace0  = (txt, store, type) =>  { // Invert Links Conversion
             }, '' ) 
         :txt;} // end of ternary 
 
+// TO DO fix quotes and 3``` at start of text
+
 const makeHtml = (txt,type) => {                // LInk Invert conversion   // 
 
     let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
@@ -262,12 +260,12 @@ const makeHtml = (txt,type) => {                // LInk Invert conversion   //
             break;
         case 'quote': 
             regexToMatch = />\s[\s\S]*?\n/gm
-            regexToHtml=   />\s(?<quote>[\s\S]*?)\n/m 
+            regexToHtml=   />\s(?<quote>[\s\S]*?)\n/ 
             regexToSubstGroups = `\n<blockquote>| $<quote></blockquote><br/>\n`;
             break;
  
     }
-    // type = 'quote' ? log('replace quoe', txt.replace(regexToHtml, `\n<blockquote>$<quote></blockquote><br/>\n`)) : log('')
+   
     let matching = txt.match(regexToMatch) ;
     if (matching !== null) { 
         txt = txt.replace(regexToHtml, type === 'code'? `\n<code>` + convertCodeBlock(matching[0]) + `</code>\n` : regexToSubstGroups  
@@ -321,15 +319,17 @@ return inStr // return of process()
 }
 
 const bufferPreTxt = (inStr) => { 
+    // log('instr', inStr.split(''))
     // b-InStr - ``` to <code> // c_InStr hides <code> // other replacing // d_InStr - unhide back <code)
-
-    let b_InStr = makeHtml(preIn, 'code')
+     
+    let b_InStr = makeHtml(inStr, 'code')
     let [c_InStr, store] = linkPlaceholdReplace(b_InStr, 'code')
 
-    c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
-    let d_InStr =  linkInverseReplace0(c_InStr, store, 'code')
-    let e_InStr = makeHtml(inStr, 'quote')
-    return  e_InStr
+        c_InStr = breakLines(c_InStr).map(str => process(str)).join('') // make strings
+    let d_InStr =  linkInverseReplace0(c_InStr, store, 'code');
+    // let quote_InStr = makeHtml(c_InStr, 'quote') ;
+     // replace Blockquotes
+    return  d_InStr
 }
 
 const handleIn = (e) => {

@@ -6,7 +6,8 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-   const initialPreIn  = `z_c_\n\`\`\`\n[i_g**en]( z\n\`\`\`d! [gg_\n\`\`\`\n<*hi\n\`\`\`\nd![li 12v_*\n> Quota\n other text strings`
+   const initialPreIn  = `<h1>z<i>#c</i></h1><hr/><br/>
+   <p></p><p>undefinedQuote abcd </p><p>---</p><p><code><br/>[google.com](http://go.com)fg_<br/>\`\`\`<br/></code></p><p><<b>h##<i>i</p><p>\`\`\`</p><p>d<img src="http://ya_**x.ru" alt="li_nk"/> 12v</i></b></p>`
     const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
