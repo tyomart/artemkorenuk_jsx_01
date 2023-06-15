@@ -6,8 +6,7 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-   const initialPreIn  = `<h1>z<i>#c</i></h1><hr/><br/>
-   <p></p><p>undefinedQuote abcd </p><p>---</p><p><code><br/>[google.com](http://go.com)fg_<br/>\`\`\`<br/></code></p><p><<b>h##<i>i</p><p>\`\`\`</p><p>d<img src="http://ya_**x.ru" alt="li_nk"/> 12v</i></b></p>`
+   const initialPreIn  = `ogle.com](http://go.com)fg_<br/>\n\`\`\`\n<br/></code></p\n\`\`\`\n</p><p>d<img src="http://ya_*`
     const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
@@ -120,10 +119,7 @@ const uniReplace = (txt, type) => {
     }
     
 }
-const aTest = `#z_#c_\
-                \n
-                > quotesfsdf afsdf\n
-                aaaaa`
+const aTest = `#z_#c_\n\n> Quote abcd \n---\n\`\`\`\n**[i_g](hr**h##_i\n\`\`\`\nd![lik](h**x.ru) 12v_**`
 
 const linkPlaceholdReplace = (txt,type) => {
 
@@ -173,6 +169,8 @@ const linkInverseReplace0  = (txt, store, type) =>  { // Invert Links Conversion
 const convertCodeBlock = (txt) => {
 log('txt: ', txt.split(''))
     txt = txt.replace(/\n/gm, '<br/>')
+
+    log('replaced TXT', txt)
     return txt
 }
 
@@ -181,24 +179,27 @@ const makeHtml = (txt,type) => {                // LInk Invert conversion   //
     let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; let codeBlock = 'a';
     switch(type) {
     
-        case 'quote': 
-            regexToMatch = />\s[\s\S]*?\n/gm
-            regexToHtml=   />\s(?<quote>[\s\S]*?)\n/m 
-            regexToSubstGroups = `\n<blockquote>| $<quote></blockquote><br/>\n`;
-        break;
+        case 'code': 
+            regexToMatch = /\n\`\`\`\n[\s\S]*?\n\`\`\`\n/gm
+            regexToHtml=   /\n\`\`\`\n(?<codeRGX>[\s\S]*?)\n\`\`\`\n/gm 
+            regexToSubstGroups = `\n<code>$<codeRGX></code>\n`;
+            break;
 
              }
 let matching = txt.match(regexToMatch) ;
- log('matching', matching !== null ? matching[0] : 'NULL')
+ log('matching', matching !== null ? '>: '+ matching[0]+'\n ' : 'NULL')
     if (matching !== null) { 
-        txt = txt.replace(regexToHtml, regexToSubstGroups  
-        )
+        txt = txt.replace(regexToHtml, type === 'code'? `\n<code>` + convertCodeBlock(matching[0].replace(/```/gm,'')) + `</code>\n` : regexToSubstGroups )
 
     return makeHtml(txt, type)
 }
 else return txt 
     }
 
+const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
+ 
+    return log('make hTML', makeHtml(aTest, 'code') )
+ }
 
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
 
@@ -211,10 +212,7 @@ const process = (inStr) => {
  
         str = uniReplace(str,'i')   
         str = uniReplace(str,'`')   
-// ----------// // uniReplace block -------------
-
-        // //get back transformed brackets
-  
+// ----------// // uniReplace block ------------- 
         return str
         } // withBracketsReplace end
 
@@ -226,14 +224,8 @@ return inStr // return of process()
 }
 
 const bufferPreTxt = (inStr) => { 
-    // b-InStr - ``` to <code> // c_InStr hides <code> // other replacing // d_InStr - unhide back <code)
 
-    // let b_InStr = makeHtml(preIn, 'code')
-    // let [c_InStr, store] = linkPlaceholdReplace(b_InStr, 'code')
-
-    // c_InStr = breakLines(c_InStr).map(str => process(str)).join('') 
-    // let d_InStr =  linkInverseReplace0(c_InStr, store, 'code')
-    let e_InStr = makeHtml(inStr, 'quote')
+    let e_InStr = makeHtml(inStr, 'code')
     return  e_InStr
 }
 
@@ -244,10 +236,7 @@ const handleIn = (e) => {
     return 
 }
 // make stubs OOO -> process text -> inverse to HTML
-const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
-   
-    return log('quote', makeHtml(preIn, 'quote'))
-}
+
 
 useLayoutEffect(()=>{                 //triggering Text Processor and sync editor and ReadyTXT
 
