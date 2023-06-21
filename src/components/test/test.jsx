@@ -6,7 +6,7 @@ import { json } from 'react-router-dom';
 
 const log = console.log
 const Markdown = () => {
-   const initialPreIn  = `ogle.com](http://go.com)fg_<br/>\n\`\`\`\n<br/></code></p\n\`\`\`\n</p><p>d<img src="http://ya_*`
+   const initialPreIn  = `#z_#c_\n- List abcd \n- list 2 bbbb\n\n 12v_**`
     const [preIn, setPreIn] = useState(initialPreIn ) // inputing state
 const [edit, setEdit] = useState('') // //what Shows in editor
 const [readyTXT, setReadyTXT] = useState('') //Shows Output
@@ -119,7 +119,8 @@ const uniReplace = (txt, type) => {
     }
     
 }
-const aTest = `#z_#c_\n\n> Quote abcd \n---\n\`\`\`\n**[i_g](hr**h##_i\n\`\`\`\nd![lik](h**x.ru) 12v_**`
+// const aTest = `#z_#c_\n\n> Quote abcd \n---\n\`\`\`\n**[i_g](hr**h##_i\n\`\`\`\nd![lik](h**x.ru) 12v_**`
+const aTest = `#z_#c_\n- List abcd \n- list 2 bbbb\n\n 12v_**`
 
 const linkPlaceholdReplace = (txt,type) => {
 
@@ -167,29 +168,74 @@ const linkInverseReplace0  = (txt, store, type) =>  { // Invert Links Conversion
         :txt;} // end of ternary 
 
 const convertCodeBlock = (txt) => {
-log('txt: ', txt.split(''))
+// log('txt: ', txt.split(''))
     txt = txt.replace(/\n/gm, '<br/>')
 
-    log('replaced TXT', txt)
+    // log('replaced TXT', txt)
     return txt
 }
 
+
 const makeHtml = (txt,type) => {                // LInk Invert conversion   // 
-
-    let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; let codeBlock = 'a';
-    switch(type) {
+    // log('txt\n', txt.split(''))
+    const convertCodeBlock = (codeBlock) => {
     
-        case 'code': 
-            regexToMatch = /\n\`\`\`\n[\s\S]*?\n\`\`\`\n/gm
-            regexToHtml=   /\n\`\`\`\n(?<codeRGX>[\s\S]*?)\n\`\`\`\n/gm 
-            regexToSubstGroups = `\n<code>$<codeRGX></code>\n`;
-            break;
+        codeBlock = codeBlock.replace(/\n/gm, '<br/>')
+        return codeBlock
+    }
 
-             }
-let matching = txt.match(regexToMatch) ;
- log('matching', matching !== null ? '>: '+ matching[0]+'\n ' : 'NULL')
-    if (matching !== null) { 
-        txt = txt.replace(regexToHtml, type === 'code'? `\n<code>` + convertCodeBlock(matching[0].replace(/```/gm,'')) + `</code>\n` : regexToSubstGroups )
+    const convertUList = (ulist) => { log('uList\n', ulist.split('') )
+       ulist = ulist !== undefined ? ulist.replace(/^/m,'<li>').replace(/$/m,'</li>\n') : 'QQQQ' //replace(/^\s*?\-\s?([\s\S]*?)$/, ``) //$<li>$1</li> //replace(/^/m,'<li>').replace(/$/m,'</li>\n')
+        
+    //    log('final ulist', ulist)
+       return ulist
+    }
+    let regexToMatch = '';  let regexToHtml=  '';  let  regexToSubstGroups = ""; 
+
+    switch(type) {          // types reducer
+        case 'link': 
+            regexToMatch =  /\[(.*?)\]\((.*?)\)/; 
+            regexToHtml =   /\[(?<link>[^\]]+)\]\((?<url>[^)]+)\)/  ;
+            regexToSubstGroups = `<a href="$<url>">$<link></a>`;
+            break;
+        case 'img': 
+            regexToMatch = /\!\[(.*?)\]\((.*?)\)/ 
+            regexToHtml=   /\!\[(?<alt>[^\]]+)\]\((?<url>[^)]+)\)/   
+            regexToSubstGroups = `<img src="$<url>" alt="$<alt>"/>`;
+            break;
+        case 'code': 
+            regexToMatch = /\n```\n[\s\S]*?\n```\n/gm
+            regexToHtml=   /\n```\n(?<codeRGX>[\s\S]*?)\n```\n/gm 
+            regexToSubstGroups = `<code>$<codeRGX></code>`;
+            break;
+        case 'quote': 
+            regexToMatch = /\n>\s[\s\S]*?\n/gm
+            regexToHtml=   />\s(?<quote>[\s\S]*?)\n/m 
+            regexToSubstGroups = `<blockquote>| $<quote></blockquote><br/>`;
+        break;
+        case 'list': 
+            regexToMatch = /^\s*?\-([\s\S]*?)\n\n/gm
+            regexToHtml=   /^\s*?\-(?<ult>[\s\S]*?)\n\n/m
+            regexToSubstGroups = `<ul>$<ult>--EMRGENCY cASE xxx </ul><br/>`; // not useful because of matching[0]
+        break;
+ 
+    }
+   
+    const convertList = (txt) => {
+        log('theList \n', txt.split(''))
+        return txt.replace(/^\s*?\-(?<listTXT>[\s\S]*?)\n/gm, `<li>$<listTXT></li>`)
+    }
+    const replaceToHtml = (type,theList) => {  // TO DO - make right replacing to one <ul> instead of several
+        switch (type) { // use matching[0] as matching to convert inside block
+            case 'code': return `\n<code>` + convertCodeBlock(matching[0].replace(/\n```\n/gm,'')) + `</code>\n`;
+            case 'list': return `\n<ul>${theList}</ul>\n`; //${convertUList(theList)} // convertList(theList)
+            default:  return regexToSubstGroups;
+        }
+    }
+    let matching = txt.match(regexToMatch) ;
+    if (matching !== null) { //log('match finding', matching[0])
+        txt = txt.replace(regexToHtml, replaceToHtml(type, matching[0])) // matching[0] if exist -> theList in replaceToHtml
+ 
 
     return makeHtml(txt, type)
 }
@@ -197,8 +243,17 @@ else return txt
     }
 
 const handleTest = () => { // --------------------------------TEST BUTTON -------------------------------------------------------------------
- 
-    return log('make hTML', makeHtml(aTest, 'code') )
+   
+    const bTest = `##z_#c_\n- List abcd \n###list 2 bbbb\n\n 12v_**`
+    const headerReplace = (txt) => {
+        return txt = txt.replace(/(?:^|\n)(?!##[^\n]*\n)#\s(?<hd1Gr>[^\n]*)\n/g,`<h1>$<hd1Gr></h1><hr/>`)
+                            // .replace(/(?:^|\n)(?!###[^\n]*\n)##\s(?<hd2Gr>[^\n]*)\n/g,`<h2>$<hd2Gr></h2><hr/>`)
+                            // .replace(/(?:^|\n)(?!####[^\n]*\n)###\s(?<hd3Gr>[^\n]*)\n/g,`<h3>$<hd3Gr></h3><hr/>`)
+                            // .replace(/(?:^|\n)(?!#####[^\n]*\n)####\s(?<hd4Gr>[^\n]*)\n/g,`<h4>$<hd4Gr></h4><hr/>`)
+       }
+log('replacing', headerReplace(bTest))
+
+    
  }
 
   // process -> ###s -> withBracketsReplace -> etc foos -> return process
@@ -222,11 +277,17 @@ const process = (inStr) => {
     inStr = convertEndStr(inStr);
 return inStr // return of process()
 }
-
+const headerReplace0 = (txt) => {
+    return txt = txt.replace(/^#(?<hd1Gr>[\s\S]*?)\n/,`<h1>$<hd1Gr></h1><hr/>`).
+                replace(/^##(?<hd2Gr>[\s\S]*?)\n/,`<h2>$<hd2Gr></h2><hr/>`).
+                    replace(/^###(?<hd3Gr>[\s\S]*?)\n/,`<h3>$<hd3Gr></h3><hr/>`).
+                        replace(/^####(?<hd4Gr>[\s\S]*?)\n/,`<h4>$<hd4Gr></h4><hr/>`)
+   }
 const bufferPreTxt = (inStr) => { 
-
-    let e_InStr = makeHtml(inStr, 'code')
-    return  e_InStr
+    // log('inStr', inStr.split(''))
+    inStr = headerReplace0(inStr)
+    inStr = makeHtml(inStr, 'list')
+    return inStr// e_InStr
 }
 
 const handleIn = (e) => {
@@ -280,7 +341,7 @@ const Preview = (props) => {  //const { eDisp }  = props
 //BIG RETURN before OUTPUT ---------------------------------
     return <> 
 
-    <div>Markdown (under construct.)</div>
+    <div id = 'test-area'>test area</div>
         <div id='editor'>editor
         <div id='input-wrapper'>
         <label>
