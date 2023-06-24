@@ -41,7 +41,7 @@ const newQ = () => {
   } 
 return ( // BIG RETURN 
 
-<>
+<div id='main-qtmt'>
   { (n.length === 0) 
     ? <p>Loading quotes</p> 
       : q.author 
@@ -56,7 +56,7 @@ return ( // BIG RETURN
           : <p>no quotes</p>
     } 
         <footer><div id='footer'>Quotamat 1.0 by Artem Korenuk for freeCodeCamp certification projects </div></footer>
-</>
+</div>
 );
 }
 export default Quotamat

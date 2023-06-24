@@ -12,7 +12,7 @@
 //      
 import './calculator_style.less'
 import { useState, } from 'react' // useReducer, useEffect
-import { createContext,useContext } from 'react'
+import { createContext, useContext } from 'react'
 
 
 const InpContext = createContext(null);
@@ -195,7 +195,7 @@ return (
 
 <InpContext.Provider value={inp}>
 <div className ='block'>
-<h4 className='app-title'>Calculator (mvp ver.1.0)</h4>
+<h4 className='app-title'>Calculator (ver.0.95)</h4>
 
     <Display dInp={inp} switchD ={switchD} eqPressed = {eqPressed}/>  
     {/* dMem={mem} */}
@@ -216,7 +216,7 @@ return (
             <button  onClick={handleComa} value='.' className="button">.</button>
             <button onClick={handleEq} className="button">=</button>
             <button onClick={handleChangeC} className="button">C</button>
-            <button onClick={handleInv} className="button">Inv</button>
+            {/* <button onClick={handleInv} className="button">Inv</button> */}
             {/* <button onClick={handleTest2} className="button">T2</button> */}
         </div>
 

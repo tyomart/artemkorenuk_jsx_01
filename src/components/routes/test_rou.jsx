@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import Test from '../test/test'
+import Test from '../test/test2'
 
 
 const Test_rou = () => {

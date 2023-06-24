@@ -4,15 +4,10 @@ import './App_style.less';
 
 import { Route, Router, Routes } from "react-router-dom"
 
-import Sandbox4 from './components/sandbox4.comp';
 
-import Timer from './components/timer/timer_comp';
-import TaskListComp from './components/task_list_comp/taskListcomp';
-import Calculator from './components/calculator/calculator';
-import Quotamat from './components/quotamat/quotamat';
-import Markdown from './components/markdown/markdown';
 
-import Main_rou from './components/routes/main';
+
+// import Main_route from './components/routes/main_route';
 import Markdown_rou from './components/routes/markdown_rou';
 import Quatomator_rou from './components/routes/quatomator_rou';
 import Calculator_rou from './components/routes/calculator_rou';
@@ -28,9 +23,10 @@ const App = () => {
   return ( <>
 <Routes>
 
-  <Route path='/' element={<Navigator/>}>
-        <Route index element={<Main_rou  />} />
-        <Route path='calculator' element={<Calculator_rou />} />
+  <Route path='/' element={<Navigator/>} //id='navigator-onapp'
+  >
+        {/* <Route index element={<Main_route  />} /> */}
+        <Route path='calculator' index element={<Calculator_rou />} />
         <Route path='quotamat' element={<Quatomator_rou />} />
         <Route path='markdown' element={<Markdown_rou />} />
         <Route path='test' element={<Test_rou />} />
