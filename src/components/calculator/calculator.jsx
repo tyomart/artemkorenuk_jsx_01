@@ -10,7 +10,7 @@
 //      Inversion button and op
 //      ops with negative numbers
 //      
-import './calculator_style.less'
+import './calculator_style.scss'
 import { useState, } from 'react' // useReducer, useEffect
 import { createContext, useContext } from 'react'
 
@@ -76,11 +76,17 @@ return <span>
         }</div>
 
         }
-    <div className='service'>service:
    
-        {/* <div>dInp {dInp} tp {typeof dInp}</div> */}
-        <div>inpusContext {inpusContext} tp{typeof inpusContext}</div>
+   
+        {/* 
+         <div className='service'>service:
+        
+        <div>dInp {dInp} tp {typeof dInp}</div> 
+        
+          <div>inpusContext {inpusContext} tp{typeof inpusContext}</div>
     </div>
+        */}
+      
 </span>
 }
 

@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { Outlet, Link } from 'react-router-dom';
 
-import'./navigator-style.less'
+import'./navigator-style.scss'
 
 const Navigator = () => {
 

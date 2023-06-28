@@ -1,5 +1,5 @@
 
-import './test-styles.less'
+import './test-styles.scss'
 import { useState, useEffect } from 'react'
 // import Calculator from '../calculator/calculator';
 // import Markdown from '../markdown/markdown';

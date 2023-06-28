@@ -1,5 +1,5 @@
 
-// import './test-styles.less'
+// import './test-styles.scss'
 import { useState, useContext, useEffect,  useLayoutEffect, useReducer } from 'react'
 import $ from 'jquery';
 import { json } from 'react-router-dom';

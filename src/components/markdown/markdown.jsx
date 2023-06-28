@@ -1,5 +1,5 @@
 
-import './markdown-styles.less'
+import './markdown-styles.scss'
 import { useState, useLayoutEffect, useRef, useEffect } from 'react'
 import $ from 'jquery';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';

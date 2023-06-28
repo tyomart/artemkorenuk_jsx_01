@@ -1,6 +1,6 @@
 import { useState, useEffect} from "react";
 
-import './quotamat-style.less'
+import './quotamat-style.scss'
 
 const log = console.log
 

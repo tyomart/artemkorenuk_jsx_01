@@ -3,7 +3,7 @@ import Calculator from "../calculator/calculator";
 import Quotamat from "../quotamat/quotamat";
 import Markdown from "../markdown/markdown";
 
-import './main-style.less'
+import './main-style.scss'
 
 
 const Main_route = () => {

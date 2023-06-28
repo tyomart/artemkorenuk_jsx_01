@@ -11,19 +11,21 @@
     
     
   }
-.block {
-
-  font-family: sans-serif;
+  .block {
+    font-family: sans-serif;
     font-size: 20px;
     width: 320px;
     min-height: 50vh;
     max-height: 120vh;
     margin: 10px;
     // background-color: rgba(140,130,200,0.8);
-    background-image: linear-gradient(0deg, rgba(240,130,200) 90%, rgba(140,130,200,0.8) 100%);
+    // background-image: grey; //linear-gradient(0deg, rgba(240,130,200,1) 90%, rgba(140,130,200,0.8) 100%);
     
     border-radius: 10px;
-}
+    border: 3px solid  black;
+
+    box-shadow: 5px 4px lightblue;
+  }
 
 .app-title {
   font-family: 'Barlow', sans-serif;
@@ -44,8 +46,10 @@ text-align: center;
     margin:  30px  auto 15px auto;
     font-size: xx-large;
 
-    border: 2px solid rgb(185, 152, 234);
+    border: 3px solid rgb(125, 99, 164);
     border-radius: 10px;
+
+    // box-shadow: 2px 1px lightblue;
     
 }
 
@@ -54,7 +58,7 @@ text-align: center;
     flex:inline;
     
 
-    background-image: linear-gradient(180deg, rgba(240,130,200) 50%, rgba(140,130,200,0.03) 100%);
+    // background-image: linear-gradient(180deg, rgba(240,130,200) 50%, rgba(140,130,200,0.03) 100%);
     padding: 30px 10px 30px 10px;
     margin-left:auto;
     margin-right:auto;
@@ -87,11 +91,13 @@ padding-left: 20px
 
 .button {
     background-color: white;
-    border: 3px solid rgba(140,130,200,0.8);
+    // border: 3px solid rgba(140,130,200,0.8);
     min-width: 60px;
     padding: 10px;
     font-size: 24px;
     border-radius: 10px;
+
+    box-shadow:8px 6px lightblue;
     
     
 }

@@ -1,6 +1,6 @@
 
 import './_App.css';
-import './App_style.less';
+import './App_style.scss';
 
 import { Route, Router, Routes } from "react-router-dom"
 
